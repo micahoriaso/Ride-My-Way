@@ -4,7 +4,7 @@ body{
 }
 .site-header{
     height: 10vh;
-    background-color: #ffffff;
+    background-color: #fafbfc;
     padding: 2em;
     box-sizing: border-box;
     border-bottom: 1px solid #ebeff2;
@@ -12,16 +12,14 @@ body{
 
 .site-body{
     height: 80vh;
-    background-color: #fafbfc;
-    padding: 80px 0;
+    background-color: #ffffff;
     box-sizing: border-box;
 }
 
 .signup-form-wrapper{
     width: 25%;
     height: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 80px auto;
     padding: 20px;
     border: solid 1px #D4D4D5
 }
@@ -42,7 +40,11 @@ input{
 }
 .primary{
     background-color: #1a69a4;
-    color: white;
+    color: white !important;
+}
+.green{
+    background-color: #21ba45;
+    color: white !important;
 }
 
 .fluid{
@@ -73,4 +75,56 @@ input{
     padding: 1%;
     border-radius: 1rem;
     box-sizing: border-box;
+    float: left;
+}
+.user-profile-pill{
+    float: right;
+}
+
+.pull-right{
+    float: right;
+}
+.pull-left{
+    float: left;
+}
+.secondary{
+    background-color: #f9fafb;
+}
+.ui.table{
+    border-collapse: collapse;
+}
+.ui.table td, .ui.table th{
+    border: 1px solid #d1d8dd;
+    padding: 0.7em;
+}
+.ui.table thead th {
+    color: #8d99a6;
+    font-weight: bold;
+}
+
+.ui.table td{
+    color: #555;
+}
+.main-head{
+    padding: 1em;
+    box-sizing: border-box;
+    border-bottom: #d1d8dd 1px solid;
+    height: 80px;
+}
+.button{
+    cursor: pointer;
+    display: inline-block;
+    min-height: 1em;
+    vertical-align: baseline;
+    color: rgba(0, 0, 0, 0.6);
+    padding: 0.5em 1em 0.5em;
+    font-weight: bold;
+    line-height: 1em;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 0.3rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
