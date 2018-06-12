@@ -239,6 +239,7 @@ input:read-only{
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
+    padding: 10px;
 }
 
 .row{
@@ -316,7 +317,7 @@ input:read-only{
     border-left: #d1d8dd 1px solid;
     border-right: #d1d8dd 1px solid;
     border-bottom: #d1d8dd 1px solid;
-    padding: 10px;
+    /* padding: 10px; */
 }
 /* Responsive */
 @media only screen and (max-width: 767px){
