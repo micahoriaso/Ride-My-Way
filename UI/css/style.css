@@ -161,6 +161,11 @@ input:read-only{
     color: white !important;
 }
 
+.red{
+    background-color: #db2828;
+    color: white !important;
+}
+
 .fluid{
     width: 100%;
 }
@@ -213,6 +218,10 @@ input:read-only{
 .table-wrapper{
     overflow-x: auto;
 }
+.ui.very.basic.table td,  .ui.very.basic.table th{
+    border: none;
+    border-bottom: 1px solid #d1d8dd;
+}
 
 /* Button */
 .button{
@@ -231,6 +240,7 @@ input:read-only{
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    margin: 2px;
 }
 
 /* Grid */
