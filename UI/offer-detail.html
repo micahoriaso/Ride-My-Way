@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Ride Detail</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
@@ -9,76 +12,86 @@
 <body>
     <div class="site-header">
         <div class="container">
-            <div class="site-title primary text center">
-                Ride My Way
-            </div>
-            <div class="user-profile-pill">
-                Micah Oriaso
+            <div class="site-header-wrapper">
+                <h2 class="site-title">
+                    Ride My Way
+                </h2>
+                <div class="user-profile-pill">
+                    <p>
+                        Micah Oriaso
+                    </p>
+                </div>
             </div>
         </div>
     </div>
     <div class="site-body">
-        <div class="main-head">
+        <div class="main-header">
             <div class="container">
-                <h3>Cynthia West</h3>
+                <div class="main-header-wrapper">
+                    <h3>Cynthia West</h3>
+                </div>
             </div>
         </div>
         <div class="container">
             <div class="form-header">
                     <a href="#" class="primary button pull-right">Request</a>
             </div>
-            <div class="segment">
-                <table class="fluid">
-                    <thead class="secondary">
-                        <tr>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="field">
-                                    <label>From</label>
-                                    <input type="text" value="Nyayo Stadium" name="from_location" readonly>
+            <div class="segment fluid">
+                <form id="signup" action="#" method="post">
+                    <div class="form-items">
+                        <div class="grid">
+                            <div class="row">
+                                <div class="four wide column">
+                                    <div class="form-field">
+                                        <label class="field-label" for="from_location">From</label>
+                                        <input type="text" value="Nyayo Stadium" name="from_location" readonly>
+                                    </div>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="field">
-                                    <label>To</label>
-                                    <input type="text" value="T-Mall, Nairobi West" name="to_location" readonly>
+                                <div class="four wide column">
+                                    <div class="form-field">
+                                        <label class="field-label" for="to_location">To</label>
+                                        <input type="text" value="T-Mall, Nairobi West" name="to_location" readonly>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="field">
-                                    <label>Leaves at</label>
-                                    <input type="text" value="6:00pm" name="depature_time" readonly>
+                            </div>
+                            <div class="row">
+                                <div class="four wide column">
+                                    <div class="form-field">
+                                        <label class="field-label" for="depature_time">Leaves at</label>
+                                        <input type="text" value="6:00pm" name="depature_time" readonly>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="field">
-                                    <label>Car</label>
-                                    <input type="text" value="Mazda MX5" name="vehicle" readonly>
+                            </div>
+                            <div class="row">
+                                <div class="four wide column">
+                                    <div class="form-field">
+                                        <label class="field-label" for="vehicle">Car</label>
+                                        <input type="text" value="Mazda MX5" name="vehicle" readonly>
+                                    </div>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="field">
-                                    <label>Registration</label>
-                                    <input type="text" value="KAA 875I" name="vehicle" readonly>
+                                <div class="four wide column">
+                                    <div class="form-field">
+                                        <label class="field-label" for="registration">Registration</label>
+                                        <input type="text" value="KAA 875I" name="registration" readonly>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                    </tfoot>
-                </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
     <div class="site-footer">
+        <div class="container">
+            <div class="site-copyright">
+                <p>
+                    &copy; 2018, Micah Oriaso
+                </p>
+            </div>
+        </div>
     </div>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
