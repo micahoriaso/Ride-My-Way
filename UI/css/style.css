@@ -128,3 +128,30 @@ input{
     -ms-user-select: none;
     user-select: none;
 }
+.form-header{
+    background-color: #fafbfc;
+    padding: .5em;
+    box-sizing: border-box;
+    border-right: #d1d8dd 1px solid;
+    border-left: #d1d8dd 1px solid;
+    border-bottom: #d1d8dd 1px solid;
+    height: 50px;
+}
+input:read-only{
+    background-color: #f5f7fa;
+    outline: none;
+    border: none;
+}
+
+.field > label {
+    color: #8D99A6;
+    font-weight: normal;
+    display: block;
+}
+.segment{
+    border-left: #d1d8dd 1px solid;
+    border-right: #d1d8dd 1px solid;
+    border-bottom: #d1d8dd 1px solid;
+    box-sizing: border-box;
+    padding: 10px;
+}
