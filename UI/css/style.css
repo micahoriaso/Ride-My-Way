@@ -62,10 +62,6 @@ body{
     flex-direction: column;
 }
 
-.test{
-    width: 100%;
-    height: 50px;
-}
 .signup-login-flex{
     display: flex;
     justify-content: center;
