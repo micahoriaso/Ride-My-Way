@@ -25,6 +25,9 @@ body{
 .site-title{
     width: 200px;
     border-radius: 1rem;
+}
+
+.site-title a{
     color: #1a69a4;
 }
 
