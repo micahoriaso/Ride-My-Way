@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_restful import reqparse, abort, Api, Resource
 
-rides = {
+RIDES = {
     "1": {
         "id": 1,
         "date": "12-06-2018",
@@ -44,6 +44,11 @@ rides = {
 }
 
 
+def abort_if_ride_doesnt_exist(ride_id):
+    if ride_id not in RIDES:
+        abort(404, message="The ride offer {} doesn't exist".format(ride_id))
+
+
 # Create a handler for our read (GET) rides
 
 def read():
@@ -52,9 +57,23 @@ def read():
     with the complete list of ride offers
     """
     # Create the list of ride offers from our data
-    return [rides[key] for key in sorted(rides.keys())]
+    return [RIDES[key] for key in sorted(RIDES.keys())]
 
-class Rides(Resource):
+def read_one(key):
+    """
+    This function responds to a request for /api/v1/rides/<ride_id>
+    with a ride offer
+    """
+    # Create the list of ride offers from our data
+    return RIDES[key]
+
+class RideList(Resource):
     # GET method for ride offers list
     def get(self):
         return read(), 200
+
+class Ride(Resource):
+    # GET method for a ride offer
+    def get(self, ride_id):
+        abort_if_ride_doesnt_exist(ride_id)
+        return read_one(ride_id), 200
