@@ -28,7 +28,8 @@ flask run
 ```
 # Testing
 To test run the command 
-```pytest
+```
+pytest
 ```
 
 # Author
