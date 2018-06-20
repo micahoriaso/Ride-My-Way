@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_restful import Api
+from flaskr.rides import Rides
 
 def create_app(test_config=None):
     # Create an instance of the flask application
@@ -10,11 +12,11 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         app.config.update(test_config)
-    
-    # Apply blueprints to the app
-    from flaskr import rides
-    app.register_blueprint(rides.bp)
 
+    api = Api(app)
+
+    api.add_resource(Rides, '/api/v1/rides/')
+    
     if __name__ == '__main__':
         app.run(debug=True)
         
