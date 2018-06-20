@@ -1,3 +1,4 @@
+https://travis-ci.org/micahoriaso/Ride-My-Way.svg?branch=ch-setup-continouous-integration-158484939
 # Ride-My-Way
 Ride-My-Way App is a carpooling application that provides drivers with the ability to create ride offers and passengers to join available ride offers.
 
@@ -6,6 +7,8 @@ Ride-My-Way App is a carpooling application that provides drivers with the abili
 
 # Author
 * **Micah Oriaso** [micahoriaso](https://github.com/micahoriaso)
+
+#
 
 ## Acknowledgments
 
