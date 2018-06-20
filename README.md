@@ -1,4 +1,4 @@
-https://travis-ci.org/micahoriaso/Ride-My-Way.svg?branch=ch-setup-continouous-integration-158484939
+[![Build Status](https://travis-ci.org/micahoriaso/Ride-My-Way.svg?branch=ft-ride-offers-api-158459164)](https://travis-ci.org/micahoriaso/Ride-My-Way)
 # Ride-My-Way
 Ride-My-Way App is a carpooling application that provides drivers with the ability to create ride offers and passengers to join available ride offers.
 
@@ -26,7 +26,7 @@ set FLASK_APP=flaskr
 set FLASK_ENV=development
 flask run
 ```
-#Testing
+# Testing
 To test run the command 
 ```pytest
 ```
