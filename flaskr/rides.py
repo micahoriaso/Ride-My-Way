@@ -1,9 +1,11 @@
 from flask_restful import abort
+from flask import jsonify
 from random import randint
+from flaskr.requests import Request
 
 class Ride:
-    def __init__(self, date, time, pickup, dropoff, price, capacity, available_seats, driver, car, registration):
-        self.id = randint(1, 10)
+    def __init__(self, id, date, time, pickup, dropoff, price, capacity, available_seats, driver, car, registration, request = {}):
+        self.id = id
         self.date = date
         self.time = time
         self.pickup = pickup
@@ -14,9 +16,26 @@ class Ride:
         self.driver = driver
         self.car = car
         self.registration = registration
+        self.request = request
+
+    def add_request(self, request):
+        requestor_id = request.get('requestor_id', None)
+        requestor_name = request.get('requestor_name', None)
+
+        if str(requestor_id) not in self.request:
+            ride_request = Request(requestor_id, requestor_name)
+            self.request[requestor_id] = ride_request.json_dump()
+        else:
+            abort(406, error="Ride request for user {} already exists".format(
+                requestor_id))
+
+
+
+    def get_request(self):
+        return self.request
 
     def json_dump(self):
-        ride_meta = {}
+        # ride_meta = {}
         ride = dict(
             id=self.id,
             date=self.date,
@@ -29,9 +48,10 @@ class Ride:
             driver=self.driver,
             car=self.car,
             registration=self.registration,
+            request=self.request
         )
-        ride_meta[self.id] = ride
-        return ride_meta
+        # ride_meta[self.id] = ride
+        return ride
 
 
 class Rides:
@@ -48,7 +68,8 @@ class Rides:
                 "available_seats": "1",
                 "driver": "Farrell",
                 "car": "Mazda MX5",
-                "registration": "KAA 987I"
+                "registration": "KAA 987I",
+                "request": {}
             },
             "2": {
                 "id": 2,
@@ -61,7 +82,15 @@ class Rides:
                 "available_seats": "3",
                 "driver": "Farrell",
                 "car": "Mazda MX5",
-                "registration": "KAA 987I"
+                "registration": "KAA 987I",
+                "request": {
+                                "1": {
+                                    "requestor_id": 1,
+                                    "requestor_name": "Cynthia West",
+                                    "request_status": "Accepted",
+                                },
+
+                }
             },
             "3": {
                 "id": 3,
@@ -74,7 +103,8 @@ class Rides:
                 "available_seats": "3",
                 "driver": "Kent",
                 "car": "Honda Civic",
-                "registration": "KAG 987I"
+                "registration": "KAG 987I",
+                "request": {}
             }
         }
 
@@ -88,7 +118,9 @@ class Rides:
 
     def read(self, ride_id):
         self.abort_if_ride_doesnt_exist(ride_id)
-        return self.RIDES[ride_id]
+        return self.get_ride(ride_id).json_dump()
+
+
 
     def edit(self, ride_id, ride):
         self.abort_if_ride_doesnt_exist(ride_id)
@@ -107,6 +139,25 @@ class Rides:
         self.abort_if_ride_doesnt_exist(ride_id)
         del self.RIDES[ride_id]
         return self.RIDES
+
+    def get_ride(self, ride_id):
+        self.abort_if_ride_doesnt_exist(ride_id)
+        ride = self.RIDES[ride_id]
+
+        return Ride(
+            ride['id'],
+            ride['date'],
+            ride['time'],
+            ride['pickup'],
+            ride['dropoff'],
+            ride['price'],
+            ride['capacity'],
+            ride['available_seats'],
+            ride['driver'],
+            ride['car'],
+            ride['registration'],
+            ride['request'],
+        )
 
     def abort_if_ride_doesnt_exist(self, ride_id):
         if ride_id not in self.RIDES:
