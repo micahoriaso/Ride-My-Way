@@ -56,5 +56,7 @@ def test_add_new_ride_offer(client):
 def test_add_existing_ride_offer(client):
     response = client.post('/api/v1/rides/', data = json.dumps(data['1']), headers=headers) 
     assert response.status_code == 406
-    
 
+def test_edit_existing_ride_offer(client):
+    response = client.put('/api/v1/rides/1', data = json.dumps(data['1']), headers=headers) 
+    assert response.status_code == 200

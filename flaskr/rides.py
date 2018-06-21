@@ -90,11 +90,10 @@ class Rides:
         self.abort_if_ride_doesnt_exist(ride_id)
         return self.RIDES[ride_id]
 
-    def edit(self, ride):
-        for ride_id in ride:
-            if ride_id in self.RIDES:
-                self.RIDES[ride_id] = ride[ride_id]
-                return self.RIDES[ride_id]
+    def edit(self, ride_id, ride):
+        self.abort_if_ride_doesnt_exist(ride_id)
+        self.RIDES[ride_id] = ride
+        return self.RIDES[ride_id]
 
     def add(self, ride):
         ride_id = ride.get('id', None)
