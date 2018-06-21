@@ -19,7 +19,7 @@ data = {
         "available_seats": "1",
         "driver": "Farrell",
         "car": "Mazda MX5",
-        "registration": "KAA 987I",
+        "registration": "KAA 987I"
     },
     "4":{
         "id": "4",
@@ -32,7 +32,7 @@ data = {
         "available_seats": "1",
         "driver": "Farrell",
         "car": "Mazda MX5",
-        "registration": "KAA 987I",
+        "registration": "KAA 987I"
         }
     }
 
