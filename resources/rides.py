@@ -24,6 +24,9 @@ class RidesResource(Resource):
         response = ride
         return {"status": "success", "data": response}, 200
 
+    def delete(self, ride_id):
+        return self.rides.delete(ride_id), 200
+
 
 class RideResource(Resource):
     # GET method for a ride offer
