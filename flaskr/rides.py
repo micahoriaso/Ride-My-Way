@@ -15,7 +15,7 @@ class Ride:
         self.car = car
         self.registration = registration
 
-    def _dump(self):
+    def json_dump(self):
         ride_meta = {}
         ride = dict(
             id=self.id,
