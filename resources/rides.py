@@ -18,6 +18,12 @@ class RidesResource(Resource):
         response = ride
         return {"status": "success", "data": response}, 201
 
+    def put(self, ride_id):
+        ride = request.get_json(force=True)
+        self.rides.edit(ride_id, ride)
+        response = ride
+        return {"status": "success", "data": response}, 200
+
 
 class RideResource(Resource):
     # GET method for a ride offer
