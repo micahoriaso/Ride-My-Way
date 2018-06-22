@@ -1,5 +1,7 @@
 from flask import Flask
+
 from flask_restful import Api
+
 from resources.rides import RidesResource, RideResource
 from resources.requests import RequestResource
 
@@ -15,7 +17,6 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     api = Api(app)
-
     api.add_resource(RideResource, '/api/v1/rides/<ride_id>')
     api.add_resource(RidesResource, '/api/v1/rides/',
                      '/api/v1/rides/<ride_id>')

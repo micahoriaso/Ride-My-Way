@@ -1,10 +1,15 @@
 from flask_restful import abort
-from flask import jsonify
-from random import randint
+
 from flaskr.requests import Request
 
 class Ride:
-    def __init__(self, id, date, time, pickup, dropoff, price, capacity, available_seats, driver, car, registration, request = {}):
+    def __init__(
+            self, id, date, time, pickup, 
+            dropoff, price, capacity, 
+            available_seats, driver, 
+            car, registration, request = {}
+        ):
+        
         self.id = id
         self.date = date
         self.time = time
@@ -26,7 +31,7 @@ class Ride:
             ride_request = Request(requestor_id, requestor_name)
             self.request[requestor_id] = ride_request.json_dump()
         else:
-            abort(406, error="Ride request for user {} already exists".format(
+            abort(406, error='Ride request for user {} already exists'.format(
                 requestor_id))
 
 
@@ -53,7 +58,7 @@ class Ride:
 
     def abort_if_request_doesnt_exist(self, request_id):
         if request_id not in self.get_requests():
-            abort(404, message="The ride request {} doesn't exist".format(request_id))
+            abort(404, message='The ride request {} does not exist'.format(request_id))
 
     def json_dump(self):
         ride = dict(
@@ -72,58 +77,57 @@ class Ride:
         )
         return ride
 
-
 class Rides:
     def __init__(self):
         self.RIDES = {
-            "1": {
-                "id": 1,
-                "date": "12-06-2018",
-                "time": "11:00",
-                "pickup": "Nyayo Stadium",
-                "dropoff": "Belle Vue",
-                "price": "100",
-                "capacity": "3",
-                "available_seats": "1",
-                "driver": "Farrell",
-                "car": "Mazda MX5",
-                "registration": "KAA 987I",
-                "request": {}
+            '1': {
+                'id': 1,
+                'date': '12-06-2018',
+                'time': '11:00',
+                'pickup': 'Nyayo Stadium',
+                'dropoff': 'Belle Vue',
+                'price': '100',
+                'capacity': '3',
+                'available_seats': '1',
+                'driver': 'Farrell',
+                'car': 'Mazda MX5',
+                'registration': 'KAA 987I',
+                'request': {}
             },
-            "2": {
-                "id": 2,
-                "date": "12-06-2018",
-                "time": "13:00",
-                "pickup": "Belle Vue",
-                "dropoff": "Nyayo Stadium",
-                "price": "100",
-                "capacity": "3",
-                "available_seats": "3",
-                "driver": "Farrell",
-                "car": "Mazda MX5",
-                "registration": "KAA 987I",
-                "request": {
-                                "1": {
-                                    "requestor_id": 1,
-                                    "requestor_name": "Cynthia West",
-                                    "request_status": "Accepted",
-                                },
+            '2': {
+                'id': 2,
+                'date': '12-06-2018',
+                'time': '13:00',
+                'pickup': 'Belle Vue',
+                'dropoff': 'Nyayo Stadium',
+                'price': '100',
+                'capacity': '3',
+                'available_seats': '3',
+                'driver': 'Farrell',
+                'car': 'Mazda MX5',
+                'registration': 'KAA 987I',
+                'request': {
+                            '1': {
+                                'requestor_id': 1,
+                                'requestor_name': 'Cynthia West',
+                                'request_status': 'Accepted',
+                            },
 
                 }
             },
-            "3": {
-                "id": 3,
-                "date": "14-06-2018",
-                "time": "08:00",
-                "pickup": "Ongata Rongai",
-                "dropoff": "T Mall",
-                "price": "200",
-                "capacity": "3",
-                "available_seats": "3",
-                "driver": "Kent",
-                "car": "Honda Civic",
-                "registration": "KAG 987I",
-                "request": {}
+            '3': {
+                'id': 3,
+                'date': '14-06-2018',
+                'time': '08:00',
+                'pickup': 'Ongata Rongai',
+                'dropoff': 'T Mall',
+                'price': '200',
+                'capacity': '3',
+                'available_seats': '3',
+                'driver': 'Kent',
+                'car': 'Honda Civic',
+                'registration': 'KAG 987I',
+                'request': {}
             }
         }
 
@@ -150,7 +154,7 @@ class Rides:
             self.RIDES[str(ride_id)] = ride
             return self.RIDES[ride_id]
         else:
-            abort(406, error="Ride offer with id {} already exists".format(ride_id))
+            abort(406, error='Ride offer with id {} already exists'.format(ride_id))
 
     def delete(self, ride_id):
         self.abort_if_ride_doesnt_exist(ride_id)
@@ -177,4 +181,4 @@ class Rides:
 
     def abort_if_ride_doesnt_exist(self, ride_id):
         if ride_id not in self.RIDES:
-            abort(404, message="The ride offer {} doesn't exist".format(ride_id))
+            abort(404, message='The ride offer {} does not exist'.format(ride_id))
