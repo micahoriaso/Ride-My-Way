@@ -30,12 +30,27 @@ class Ride:
                 requestor_id))
 
 
-
-    def get_request(self):
+    def get_requests(self):
         return self.request
 
+    def get_request(self, request_id):
+        self.abort_if_request_doesnt_exist(request_id)
+        request = self.request[request_id]
+        return Request(
+            request['requestor_id'],
+            request['requestor_name'],
+            request['request_status'],
+        )
+
+    def read_request(self, request_id):
+        self.abort_if_request_doesnt_exist(request_id)
+        return self.get_request(request_id).json_dump()
+
+    def abort_if_request_doesnt_exist(self, request_id):
+        if request_id not in self.get_requests():
+            abort(404, message="The ride request {} doesn't exist".format(request_id))
+
     def json_dump(self):
-        # ride_meta = {}
         ride = dict(
             id=self.id,
             date=self.date,
@@ -50,7 +65,6 @@ class Ride:
             registration=self.registration,
             request=self.request
         )
-        # ride_meta[self.id] = ride
         return ride
 
 
@@ -120,8 +134,6 @@ class Rides:
         self.abort_if_ride_doesnt_exist(ride_id)
         return self.get_ride(ride_id).json_dump()
 
-
-
     def edit(self, ride_id, ride):
         self.abort_if_ride_doesnt_exist(ride_id)
         self.RIDES[ride_id] = ride
@@ -143,7 +155,6 @@ class Rides:
     def get_ride(self, ride_id):
         self.abort_if_ride_doesnt_exist(ride_id)
         ride = self.RIDES[ride_id]
-
         return Ride(
             ride['id'],
             ride['date'],

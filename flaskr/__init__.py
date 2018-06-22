@@ -19,7 +19,8 @@ def create_app(test_config=None):
     api.add_resource(RideResource, '/api/v1/rides/<ride_id>')
     api.add_resource(RidesResource, '/api/v1/rides/',
                      '/api/v1/rides/<ride_id>')
-    api.add_resource(RequestResource, '/api/v1/rides/<ride_id>/requests')
+    api.add_resource(RequestResource, '/api/v1/rides/<ride_id>/requests',
+                     '/api/v1/rides/<ride_id>/requests/<request_id>')
     
     if __name__ == '__main__':
         app.run(debug=True)
