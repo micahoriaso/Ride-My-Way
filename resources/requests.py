@@ -35,3 +35,6 @@ class RequestResource(Resource):
         response = ride_request.json_dump()
         return {"status": "success", "data": response}, 200
 
+    def delete(self, ride_id, request_id):
+        ride = self.rides.get_ride(ride_id)
+        return ride.delete_request(request_id), 200

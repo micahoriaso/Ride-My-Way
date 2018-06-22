@@ -46,6 +46,11 @@ class Ride:
         self.abort_if_request_doesnt_exist(request_id)
         return self.get_request(request_id).json_dump()
 
+    def delete_request(self, request_id):
+        self.abort_if_request_doesnt_exist(request_id)
+        del self.request[request_id]
+        return self.request
+
     def abort_if_request_doesnt_exist(self, request_id):
         if request_id not in self.get_requests():
             abort(404, message="The ride request {} doesn't exist".format(request_id))

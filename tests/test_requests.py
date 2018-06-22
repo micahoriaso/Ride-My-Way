@@ -46,3 +46,13 @@ def test_edit_existing_ride_offer_request(client):
     response = client.put(
         '/api/v1/rides/2/requests/1', data=json.dumps(update_request), headers=headers)
     assert response.status_code == 200
+
+
+def test_delete_existing_ride_offer_request(client):
+    response = client.delete('/api/v1/rides/2/requests/1')
+    assert response.status_code == 200
+
+
+def test_delete_nonexistent_ride_offer_request(client):
+    response = client.delete('/api/v1/rides/2/requests/3')
+    assert response.status_code == 404
