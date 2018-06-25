@@ -10,19 +10,25 @@ headers = {
 
 data = {
     '1': {
+        'id': 1,
+        'ride_id': 1,
         'requestor_id': 1,
-        'requestor_name': 'Cynthia West',
-        'request_status': 'Accepted',
+        'requestor_name': 'Micah Oriaso',
+        'request_status': 'Pending'
     },
     '2': {
+        'id': 2,
+        'ride_id': 1,
         'requestor_id': 2,
-        'requestor_name': 'Mark Maasai',
-        'request_status': 'Declined',
+        'requestor_name': 'Charles Leclerc',
+        'request_status': 'Accepted'
     },
-    '3': {
-        'requestor_id': 3,
-        'requestor_name': 'Sadeeq Shaban',
-        'request_status': 'Accepted',
+    '10': {
+        'id': 10,
+        'ride_id': 2,
+        'requestor_id': 13,
+        'requestor_name': 'Peter Were',
+        'request_status': 'Accepted'
     }
 }
 
@@ -35,7 +41,7 @@ def test_get_all_requests(client):
     assert response.status_code == 200
 
 def test_add_new_ride_offer_request(client):
-    response = client.post('/api/v1/rides/2/requests', data = json.dumps(data['3']), headers=headers) 
+    response = client.post('/api/v1/rides/2/requests', data = json.dumps(data['10']), headers=headers) 
     assert response.status_code == 201
 
 def test_add_existing_ride_offer_request(client):
@@ -52,5 +58,5 @@ def test_delete_existing_ride_offer_request(client):
     assert response.status_code == 200
 
 def test_delete_nonexistent_ride_offer_request(client):
-    response = client.delete('/api/v1/rides/2/requests/3')
+    response = client.delete('/api/v1/rides/2/requests/10')
     assert response.status_code == 404

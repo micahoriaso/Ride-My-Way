@@ -2,11 +2,11 @@ from flask import request
 
 from flask_restful import Resource
 
-from flaskr.rides import Ride, Rides
+from flaskr.rides import Ride, RideList
 
-class RidesResource(Resource):
+class RideListResource(Resource):
     def __init__(self):
-        self.rides = Rides()
+        self.rides = RideList()
         
     # GET method for ride offers list
     def get(self):
@@ -15,8 +15,7 @@ class RidesResource(Resource):
     # POST method for new ride offer
     def post(self):
         ride = request.get_json(force=True)
-        self.rides.add(ride)
-        response = ride
+        response = self.rides.add(ride)
         return {'status': 'success', 'data': response}, 201
 
     # PUT method for editing a ride offer
@@ -34,7 +33,7 @@ class RidesResource(Resource):
 class RideResource(Resource):
     # GET method for a ride offer
     def get(self, ride_id):
-        rides = Rides()
+        rides = RideList()
         return rides.read(ride_id), 200
 
 

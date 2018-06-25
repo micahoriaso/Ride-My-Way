@@ -2,8 +2,8 @@ from flask import Flask
 
 from flask_restful import Api
 
-from resources.rides import RidesResource, RideResource
-from resources.requests import RequestResource
+from resources.rides import RideResource, RideListResource
+from resources.requests import RequestResource, RequestListResource
 
 def create_app(test_config=None):
     # Create an instance of the flask application
@@ -18,9 +18,10 @@ def create_app(test_config=None):
 
     api = Api(app)
     api.add_resource(RideResource, '/api/v1/rides/<ride_id>')
-    api.add_resource(RidesResource, '/api/v1/rides/',
+    api.add_resource(RideListResource, '/api/v1/rides/',
                      '/api/v1/rides/<ride_id>')
-    api.add_resource(RequestResource, '/api/v1/rides/<ride_id>/requests',
+    api.add_resource(RequestResource, '/api/v1/rides/<ride_id>/requests/<request_id>')
+    api.add_resource(RequestListResource, '/api/v1/rides/<ride_id>/requests',
                      '/api/v1/rides/<ride_id>/requests/<request_id>')
     
     if __name__ == '__main__':

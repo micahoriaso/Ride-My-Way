@@ -2,42 +2,38 @@ from flask import request
 
 from flask_restful import Resource
 
-from flaskr.rides import Ride, Rides
-from flaskr.requests import Request
+from flaskr.requests import Request , RequestList
 
-class RequestResource(Resource):
-    
+
+class RequestListResource(Resource):
     def __init__(self):
-        self.rides = Rides()
+        self.requests = RequestList()
 
-    # GET method for ride request list
+    # GET method for ride offers list
     def get(self, ride_id):
-        ride = self.rides.get_ride(ride_id)
-        response = ride.get_requests()
+        response = self.requests.browse(ride_id)
         return {'status': 'success', 'data': response}, 200
-    
-    # POST method for new ride request
+
+    # POST method for new ride offer
     def post(self, ride_id):
-        ride = self.rides.get_ride(ride_id)
         ride_request = request.get_json(force=True)
-        ride.add_request(ride_request)
-        response = ride.json_dump()
+        response = self.requests.add(ride_id, ride_request)
         return {'status': 'success', 'data': response}, 201
 
-    # PUT method for editing a ride request
+    # PUT method for editing a ride offer
     def put(self, ride_id, request_id):
-        ride = self.rides.get_ride(ride_id)
-        ride_request = ride.get_request(request_id)
-        request_action = request.get_json(force=True)
-
-        if request_action['action'] == 'Decline':
-            ride_request.decline()
-        elif request_action['action'] == 'Accept':
-            ride_request.accept()
-        response = ride_request.json_dump()
+        ride_request = request.get_json(force=True)
+        response = self.requests.edit(ride_id, request_id, ride_request)
         return {'status': 'success', 'data': response}, 200
 
-    # PUT method for deleting a ride request
+    # DELETE method for editing a ride offer
     def delete(self, ride_id, request_id):
-        ride = self.rides.get_ride(ride_id)
-        return ride.delete_request(request_id), 200
+        response = self.requests.delete(ride_id, request_id)
+        return {'status': 'success', 'data': response}, 200
+
+
+class RequestResource(Resource):
+    # GET method for a ride offer
+    def get(self, ride_id, request_id):
+        requests = RequestList()
+        return requests.read(request_id), 200
