@@ -79,3 +79,41 @@ class LoginResource(Resource):
             if user['email'] == args['email'] and check_password_hash(user['password'], args['password']):
                 return {'status': 'success', 'data': 'Login successful'}, 200
             return {'status': 'failed', 'data': 'Invalid email/password combination'}, 400
+
+
+class UserResource(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            'firstname', type=str, location='json'
+        )
+        self.reqparse.add_argument(
+            'lastname', type=str, location='json'
+        )
+        self.reqparse.add_argument(
+            'email', type=str, location='json'
+        )
+        self.reqparse.add_argument(
+            'car_registration', location='json'
+        )
+        self.reqparse.add_argument(
+            'password', type=str, location='json'
+        )
+
+        super(UserResource, self).__init__()
+
+    # PUT method for editing a user
+    def put(self, user_id):
+        user = self.abort_if_user_doesnt_exist(user_id)
+        user = user[0]
+        args = self.reqparse.parse_args()
+        for k, v in args.items():
+            if v is not None:
+                user[k] = v
+        return {'status': 'success', 'data': user}, 200
+
+    def abort_if_user_doesnt_exist(self, user_id):
+        user = [user for user in users if user['id'] == int(user_id)]
+        if len(user) == 0:
+            abort(404, message='The user {} does not exist'.format(user_id))
+        return user
