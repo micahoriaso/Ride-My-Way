@@ -117,6 +117,12 @@ class UserResource(Resource):
                 user[k] = v
         return {'status': 'success', 'data': user}, 200
 
+    # DELETE method for deleting a user
+    def delete(self, user_id):
+        user = self.abort_if_user_doesnt_exist(user_id)
+        users.remove(user[0])
+        return {'status': 'success', 'data': 'User successfully deleted'}, 200
+
     def abort_if_user_doesnt_exist(self, user_id):
         user = [user for user in users if user['id'] == int(user_id)]
         if len(user) == 0:

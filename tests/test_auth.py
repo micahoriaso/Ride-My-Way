@@ -58,3 +58,25 @@ def test_get_one_existing_user(client):
 def test_get_one_nonexisting_user(client):
     response = client.get('/api/v1/users/900')
     assert response.status_code == 404
+
+def test_delete_existing_user(client):
+    response = client.delete('/api/v1/users/1')
+    assert response.status_code == 200
+
+def test_delete_nonexistent_user(client):
+    response = client.delete('/api/v1/users/555')
+    assert response.status_code == 404
+
+def test_login_with_good_credentials(client):
+    client.post('/api/v1/auth/signup',
+                data=json.dumps(data['1']), headers=headers)
+    response = client.post('/api/v1/auth/login',
+                           data=json.dumps(data['2']), headers=headers)
+    assert response.status_code == 200
+
+def test_login_with_bad_credentials(client):
+    client.post('/api/v1/auth/signup',
+                data=json.dumps(data['1']), headers=headers)
+    response = client.post('/api/v1/auth/login',
+                           data=json.dumps(data['3']), headers=headers)
+    assert response.status_code == 400
