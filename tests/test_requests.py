@@ -10,50 +10,38 @@ headers = {
 
 data = {
     '1': {
-        'id': 1,
-        'ride_id': 1,
         'requestor_id': 1,
-        'requestor_name': 'Micah Oriaso',
         'request_status': 'Pending'
     },
     '2': {
-        'id': 2,
-        'ride_id': 1,
         'requestor_id': 2,
-        'requestor_name': 'Charles Leclerc',
         'request_status': 'Accepted'
     },
-    '10': {
-        'id': 10,
-        'ride_id': 2,
+    '3': {
         'requestor_id': 13,
-        'requestor_name': 'Peter Were',
         'request_status': 'Accepted'
     }
 }
 
-update_request = {
-    'action': 'Decline'
-}
 
 def test_get_all_requests(client):
     response = client.get('/api/v1/rides/2/requests')
     assert response.status_code == 200
 
 def test_add_new_ride_offer_request(client):
-    response = client.post('/api/v1/rides/2/requests', data = json.dumps(data['10']), headers=headers) 
+    response = client.post('/api/v1/rides/2/requests', data = json.dumps(data['3']), headers=headers) 
     assert response.status_code == 201
 
-def test_add_existing_ride_offer_request(client):
-    response = client.post('/api/v1/rides/2/requests', data = json.dumps(data['1']), headers=headers) 
-    assert response.status_code == 406
-
 def test_edit_existing_ride_offer_request(client):
+    response = client.post('/api/v1/rides/2/requests',
+                           data=json.dumps(data['3']), headers=headers)
     response = client.put(
-        '/api/v1/rides/2/requests/1', data=json.dumps(update_request), headers=headers)
+        '/api/v1/rides/2/requests/1', data=json.dumps(data['3']), headers=headers)
     assert response.status_code == 200
 
 def test_delete_existing_ride_offer_request(client):
+    response = client.post('/api/v1/rides/2/requests',
+                           data=json.dumps(data['3']), headers=headers)
     response = client.delete('/api/v1/rides/2/requests/1')
     assert response.status_code == 200
 

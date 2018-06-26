@@ -1,39 +1,74 @@
-from flask import request
+from flask_restful import Resource, reqparse, fields, marshal, abort
 
-from flask_restful import Resource
-
-from flaskr.requests import Request , RequestList
-
+requests = []
 
 class RequestListResource(Resource):
     def __init__(self):
-        self.requests = RequestList()
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            'requestor_id', type=int, required=True, help='Please enter requestor', location='json'
+        )
+        self.reqparse.add_argument(
+            'request_status', type=str, location='json', default='Pending'
+        )
+        self.reqparse.add_argument(
+            'ride_id', type=int, location='json'
+        )
+        super(RequestListResource, self).__init__()
 
-    # GET method for ride offers list
+    # GET method for ride requests list
     def get(self, ride_id):
-        response = self.requests.browse(ride_id)
-        return {'status': 'success', 'data': response}, 200
+        ride_offer_request = [
+            request for request in requests if request['ride_id'] == int(ride_id)
+            ]
+        if len(ride_offer_request) == 0:
+            return {'status': 'success', 'message': 'No requests available for this ride yet'}
+        else:
+            return {'status': 'success', 'data': ride_offer_request}
 
     # POST method for new ride offer
     def post(self, ride_id):
-        ride_request = request.get_json(force=True)
-        response = self.requests.add(ride_id, ride_request)
-        return {'status': 'success', 'data': response}, 201
+        args = self.reqparse.parse_args()
+        request = {
+            'id': len(requests) + 1,
+            'requestor_id': args['requestor_id'],
+            'ride_id': int(ride_id),
+            'request_status': args['request_status']
+        }
+        requests.append(request)
+        return {'status': 'success', 'data': request}, 201
+
+class RequestResource(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            'request_status', type=str, location='json', default='Pending'
+        )
+        super(RequestResource, self).__init__()
+
+    # GET method for a ride offer
+    def get(self, ride_id, request_id):
+        request = self.abort_if_ride_request_doesnt_exist(request_id)
+        return {'data': request[0]}
 
     # PUT method for editing a ride offer
     def put(self, ride_id, request_id):
-        ride_request = request.get_json(force=True)
-        response = self.requests.edit(ride_id, request_id, ride_request)
-        return {'status': 'success', 'data': response}, 200
+        request = self.abort_if_ride_request_doesnt_exist(request_id)
+        request = request[0]
+        args = self.reqparse.parse_args()
+        for k, v in args.items():
+            if v is not None:
+                request[k] = v
+        return {'status': 'success', 'data': request}, 200
 
     # DELETE method for editing a ride offer
     def delete(self, ride_id, request_id):
-        response = self.requests.delete(ride_id, request_id)
-        return {'status': 'success', 'data': response}, 200
+        request = self.abort_if_ride_request_doesnt_exist(request_id)
+        requests.remove(request[0])
+        return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
 
-
-class RequestResource(Resource):
-    # GET method for a ride offer
-    def get(self, ride_id, request_id):
-        requests = RequestList()
-        return requests.read(request_id), 200
+    def abort_if_ride_request_doesnt_exist(self, request_id):
+            request = [request for request in requests if request['id'] == int(request_id)]
+            if len(request) == 0:
+                abort(404, message='The request {} does not exist'.format(request_id))
+            return request

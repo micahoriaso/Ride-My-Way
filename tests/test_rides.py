@@ -10,7 +10,6 @@ headers = {
 
 data = {
     '1': {
-        'id': '1',
         'date': '12-06-2018',
         'time': '11:00',
         'pickup': 'Nyayo Stadium',
@@ -23,7 +22,6 @@ data = {
         'registration': 'KAA 987I'
     },
     '4':{
-        'id': '4',
         'date': '12-06-2018',
         'time': '11:00',
         'pickup': 'Nyayo Stadium',
@@ -43,6 +41,7 @@ def test_get_all_rides(client):
     assert response.status_code == 200
 
 def test_get_one_available_ride(client):
+    response = client.post('/api/v1/rides/', data=json.dumps(data['4']), headers=headers)
     response = client.get('/api/v1/rides/1')
     assert response.status_code == 200
 
@@ -53,10 +52,6 @@ def test_get_one_unavailable_ride(client):
 def test_add_new_ride_offer(client):
     response = client.post('/api/v1/rides/', data = json.dumps(data['4']), headers=headers) 
     assert response.status_code == 201
-
-def test_add_existing_ride_offer(client):
-    response = client.post('/api/v1/rides/', data = json.dumps(data['1']), headers=headers) 
-    assert response.status_code == 406
 
 def test_edit_existing_ride_offer(client):
     response = client.put('/api/v1/rides/1', data = json.dumps(data['1']), headers=headers) 
