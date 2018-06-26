@@ -124,7 +124,7 @@ class RideResource(Resource):
                 ride[k] = v
         return {'status': 'success', 'data': ride}, 200
 
-    # DELETE method for editing a ride offer
+    # DELETE method for deleting a ride offer
     def delete(self, ride_id):
         ride = self.abort_if_ride_doesnt_exist(ride_id)
         rides.remove(ride[0])
