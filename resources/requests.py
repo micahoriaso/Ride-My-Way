@@ -46,12 +46,12 @@ class RequestResource(Resource):
         )
         super(RequestResource, self).__init__()
 
-    # GET method for a ride offer
+    # GET method for a ride request
     def get(self, ride_id, request_id):
         request = self.abort_if_ride_request_doesnt_exist(request_id)
         return {'data': request[0]}
 
-    # PUT method for editing a ride offer
+    # PUT method for editing a ride request
     def put(self, ride_id, request_id):
         request = self.abort_if_ride_request_doesnt_exist(request_id)
         request = request[0]
@@ -61,7 +61,7 @@ class RequestResource(Resource):
                 request[k] = v
         return {'status': 'success', 'data': request}, 200
 
-    # DELETE method for editing a ride offer
+    # DELETE method for deleting a ride request
     def delete(self, ride_id, request_id):
         request = self.abort_if_ride_request_doesnt_exist(request_id)
         requests.remove(request[0])
