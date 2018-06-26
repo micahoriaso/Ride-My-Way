@@ -2,9 +2,16 @@ from flask import Flask
 
 from flask_restful import Api
 
-from resources.rides import RideResource, RideListResource
-from resources.requests import RequestResource, RequestListResource
-from resources.users import UserListResource, LoginResource, UserResource
+from resourcesV1.rides import rides_v1_bp
+from resourcesV1.requests import requests_v1_bp
+from resourcesV1.users import users_v1_bp
+
+from resourcesV2.requests import requests_v2_bp
+from resourcesV2.rides import rides_v2_bp
+from resourcesV2.users import users_v2_bp
+
+from flaskr.db import create_tables
+
 
 def create_app(test_config=None):
     # Create an instance of the flask application
@@ -20,24 +27,17 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.update(test_config)
 
-    api = Api(app)
-    api.add_resource(RideResource, '/api/v1/rides/<ride_id>')
-    api.add_resource(RideListResource, '/api/v1/rides/',
-                     '/api/v1/rides/<ride_id>')
-    api.add_resource(
-        RequestResource, '/api/v1/rides/<ride_id>/requests/<request_id>'
-        )
-    api.add_resource(
-        RequestListResource, '/api/v1/rides/<ride_id>/requests',
-                     '/api/v1/rides/<ride_id>/requests/<request_id>')
-    api.add_resource(UserListResource, '/api/v1/auth/signup')
-    api.add_resource(LoginResource, '/api/v1/auth/login')
-    api.add_resource(UserResource, '/api/v1/users/<user_id>')
+    app.register_blueprint(requests_v1_bp)
+    app.register_blueprint(rides_v1_bp)
+    app.register_blueprint(users_v1_bp)
 
+    app.register_blueprint(requests_v2_bp)
+    app.register_blueprint(rides_v2_bp)
+    app.register_blueprint(users_v2_bp)
 
-    
     if __name__ == '__main__':
         app.run(debug=True)
+
         
     return app
 

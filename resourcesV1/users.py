@@ -1,4 +1,6 @@
-from flask_restful import Resource, reqparse, fields, marshal, abort
+from flask import Blueprint
+
+from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -128,3 +130,22 @@ class UserResource(Resource):
         if len(user) == 0:
             abort(404, message='The user {} does not exist'.format(user_id))
         return user
+
+
+users_v1_bp = Blueprint('resourcesV1.users', __name__)
+api = Api(users_v1_bp)
+api.add_resource(
+    UserListResource, 
+    '/api/v1/auth/signup',
+    '/api/v1/auth/signup/'
+    )
+api.add_resource(
+    LoginResource, 
+    '/api/v1/auth/login',
+    '/api/v1/auth/login/'
+    )
+api.add_resource(
+    UserResource,
+    '/api/v1/users/<user_id>',
+    '/api/v1/users/<user_id>/'
+    )

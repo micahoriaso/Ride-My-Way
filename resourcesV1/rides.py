@@ -1,4 +1,6 @@
-from flask_restful import Resource, reqparse, fields, marshal, abort
+from flask import Blueprint
+
+from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 rides = []
 
@@ -135,3 +137,19 @@ class RideResource(Resource):
         if len(ride) == 0:
             abort(404, message='The ride offer {} does not exist'.format(ride_id))
         return ride
+
+
+rides_v1_bp = Blueprint('resourcesV1.rides', __name__)
+api = Api(rides_v1_bp)
+api.add_resource(
+    RideResource, 
+    '/api/v1/rides/<ride_id>',
+    '/api/v1/rides/<ride_id>/'
+)
+api.add_resource(
+    RideListResource, 
+    '/api/v1/rides',
+    '/api/v1/rides/',
+    '/api/v1/rides/<ride_id>',
+    '/api/v1/rides/<ride_id>/'
+    )

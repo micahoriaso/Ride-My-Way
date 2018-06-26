@@ -1,4 +1,5 @@
-from flask_restful import Resource, reqparse, fields, marshal, abort
+from flask import Blueprint
+from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 requests = []
 
@@ -72,3 +73,19 @@ class RequestResource(Resource):
             if len(request) == 0:
                 abort(404, message='The request {} does not exist'.format(request_id))
             return request
+
+
+requests_v1_bp = Blueprint('resourcesV1.requests', __name__)
+api = Api(requests_v1_bp)
+api.add_resource(
+    RequestResource, 
+    '/api/v1/rides/<ride_id>/requests/<request_id>', 
+    '/api/v1/rides/<ride_id>/requests/<request_id>/'
+)
+api.add_resource(
+    RequestListResource, 
+    '/api/v1/rides/<ride_id>/requests',
+    '/api/v1/rides/<ride_id>/requests/',
+    '/api/v1/rides/<ride_id>/requests/<request_id>',
+    '/api/v1/rides/<ride_id>/requests/<request_id>/'
+    )
