@@ -100,11 +100,13 @@ body{
 
 /* Body */
 .login-signup-body{
-    height: 80vh;
+    height: 85vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #ffffff;
+    background-image: url(../images/alejandro-salinas-189861-unsplash.jpg);
+    background-size: cover
 }
 .site-body{
     min-height: 80vh;
@@ -126,7 +128,9 @@ body{
 .signup-form-wrapper{
     width: 20em;
     padding: 20px;
-    border: solid 1px #D4D4D5
+    background-color: #ffffff;
+    border: solid 1px #D4D4D5;
+    opacity: 0.9;
 }
 
 .form-items{
@@ -187,7 +191,7 @@ input:read-only{
     align-items: center;
     background-color: #ffffff;
     border-top: 1px solid #ebeff2;
-    padding: 2em;
+    padding: 1em;
 }
 
 /* Constants */
