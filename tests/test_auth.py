@@ -18,11 +18,11 @@ data = {
     },
     '2': {
         "email": "micahoriaso@gmail.com",
-        "password": "10101010"
+        "password": "10101010",
     },
     '3': {
         "email": "micahoriaso@gmail.com",
-        "password": "11111111"
+        "password": "101010101",
     },
     '4': {
         "firstname": "Mike",
@@ -40,3 +40,4 @@ data = {
 def test_signup(client):
     response = client.post('/api/v1/auth/signup', data = json.dumps(data['5']), headers = headers)
     assert response.status_code == 201
+

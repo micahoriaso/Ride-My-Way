@@ -60,3 +60,22 @@ class UserListResource(Resource):
         user = [user for user in users if user['email'] == email]
         if len(user) != 0:
             abort(400, message='The email {} is already taken'.format(email))
+
+
+class LoginResource(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            'email', type=str, required=True, help='Please enter email', location='json'
+        )
+        self.reqparse.add_argument(
+            'password', type=str, required=True, help='Please enter password', location='json'
+        )
+        super(LoginResource, self).__init__()
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        for user in users:
+            if user['email'] == args['email'] and check_password_hash(user['password'], args['password']):
+                return {'status': 'success', 'data': 'Login successful'}, 200
+            return {'status': 'failed', 'data': 'Invalid email/password combination'}, 400

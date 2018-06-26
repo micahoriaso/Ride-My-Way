@@ -4,7 +4,7 @@ from flask_restful import Api
 
 from resources.rides import RideResource, RideListResource
 from resources.requests import RequestResource, RequestListResource
-from resources.users import  UserListResource
+from resources.users import  UserListResource, LoginResource
 
 def create_app(test_config=None):
     # Create an instance of the flask application
@@ -31,6 +31,8 @@ def create_app(test_config=None):
         RequestListResource, '/api/v1/rides/<ride_id>/requests',
                      '/api/v1/rides/<ride_id>/requests/<request_id>')
     api.add_resource(UserListResource, '/api/v1/auth/signup')
+    api.add_resource(LoginResource, '/api/v1/auth/login')
+
     
     if __name__ == '__main__':
         app.run(debug=True)
