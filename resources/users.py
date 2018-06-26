@@ -102,6 +102,11 @@ class UserResource(Resource):
 
         super(UserResource, self).__init__()
 
+    # GET method for a user
+    def get(self, user_id):
+        user = self.abort_if_user_doesnt_exist(user_id)
+        return {'user': user[0]}
+
     # PUT method for editing a user
     def put(self, user_id):
         user = self.abort_if_user_doesnt_exist(user_id)
