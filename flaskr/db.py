@@ -14,14 +14,16 @@ def create_db_tables():
         """
         CREATE TABLE ride (
             id SERIAL PRIMARY KEY NOT NULL, 
-            pickup CHAR(140) NOT NULL, 
-            dropoff CHAR(140) NOT NULL, 
+            time VARCHAR(140) NOT NULL, 
+            date VARCHAR(140) NOT NULL, 
+            pickup VARCHAR(140) NOT NULL, 
+            dropoff VARCHAR(140) NOT NULL, 
             capacity INT NOT NULL, 
             seats_available INT NOT NULL, 
             driver_id INT NOT NULL, 
-            registration CHAR(140) NOT NULL, 
+            registration VARCHAR(140) NOT NULL, 
             price REAL NOT NULL, 
-            status CHAR(140) NOT NULL
+            status VARCHAR(140) NOT NULL
             );
         """,
         """
@@ -29,24 +31,24 @@ def create_db_tables():
             id SERIAL PRIMARY KEY NOT NULL, 
             ride_id INT NOT NULL, 
             requestor_id INT NOT NULL, 
-            request_status CHAR(140) NOT NULL
+            request_status VARCHAR(140) NOT NULL
             );
         """,
         """
         CREATE TABLE app_user (
             id SERIAL PRIMARY KEY NOT NULL, 
-            firstname CHAR(140) NOT NULL, 
-            lastname CHAR(140) NOT NULL, 
-            fullname CHAR(140) NOT NULL, 
-            email CHAR(140) NOT NULL, 
-            password CHAR(140) NOT NULL, 
-            car_registration CHAR(140)
+            firstname VARCHAR(140) NOT NULL, 
+            lastname VARCHAR(140) NOT NULL, 
+            fullname VARCHAR(140) NOT NULL, 
+            email VARCHAR(140) NOT NULL, 
+            password VARCHAR(140) NOT NULL, 
+            car_registration VARCHAR(140)
             );
         """,
         """
         CREATE TABLE car (
-            id CHAR(140) PRIMARY KEY NOT NULL, 
-            model CHAR(140) NOT NULL, 
+            id VARCHAR(140) PRIMARY KEY NOT NULL, 
+            model VARCHAR(140) NOT NULL, 
             capacity INT NOT NULL);
         """
     ]
