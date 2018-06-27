@@ -48,3 +48,14 @@ def test_delete_existing_ride_offer_request(client):
 def test_delete_nonexistent_ride_offer_request(client):
     response = client.delete('/api/v1/rides/2/requests/10')
     assert response.status_code == 404
+
+# API V2
+# def test_add_new_ride_request_with_db(client):
+#     response = client.post('/api/v2/rides/1/requests',
+#                            data=json.dumps(data['3']), headers=headers)
+#     assert response.status_code == 201
+
+# def test_add_new_ride_request_for_nonexisting_ride_offer_with_db(client):
+#     response = client.post('/api/v2/rides/1000/requests',
+#                            data=json.dumps(data['3']), headers=headers)
+#     assert response.status_code == 404
