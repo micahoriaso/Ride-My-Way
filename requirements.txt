@@ -12,6 +12,7 @@ flasgger==0.9.0
 Flask==1.0.2
 Flask-Migrate==2.2.1
 Flask-RESTful==0.3.6
+Flask-SQLAlchemy==2.3.2
 gunicorn==19.8.1
 idna==2.7
 isort==4.3.4
@@ -33,6 +34,7 @@ pylint==1.9.2
 pytest==3.6.1
 python-coveralls==2.9.1
 python-dateutil==2.7.3
+python-dotenv==0.8.2
 python-editor==1.0.3
 pytz==2018.4
 PyYAML==3.12
