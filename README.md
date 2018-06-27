@@ -24,8 +24,6 @@ pip install -r requirements.txt
 ```
 * Run the Flask application
 ```
-set FLASK_APP=flaskr
-set FLASK_ENV=development
 flask run
 ```
 # Testing
