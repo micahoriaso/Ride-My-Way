@@ -3,7 +3,7 @@ import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 def connectDB():
-    connection_string = 'dbname=ride_my_way user=postgres password=root100 host=localhost'
+    connection_string = 'dbname=ride_my_way user=oriaso password=root100 host=localhost'
     try:
         return psycopg2.connect(connection_string)
     except:
