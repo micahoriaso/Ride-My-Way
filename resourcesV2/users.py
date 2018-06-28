@@ -10,7 +10,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flaskr.db import connectDB
 
 
-
 class UserListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -136,13 +135,18 @@ class UserResource(Resource):
             'car_registration', location='json'
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, location='json'
         )
+
         self.connection = connectDB()
         self.cursor = self.connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
-
         super(UserResource, self).__init__()
+
+    # GET method for a user
+    def get(self, user_id):
+        request = self.abort_if_user_doesnt_exist(user_id)
+        return {'data': request}
 
     # PUT method for updating user
     def put(self, user_id):
@@ -181,7 +185,7 @@ class UserResource(Resource):
             return {'status': 'failed', 'data': error}, 500
         results = self.cursor.fetchone()
         if results is None:
-            abort(400, message='The user {} does not exist'.format(user_id))
+            abort(404, message='The user with id {} does not exist'.format(user_id))
         return results
 
 
