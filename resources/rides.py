@@ -49,6 +49,17 @@ class RideListResource(Resource):
 
     # GET method for ride list
     def get(self):
+        """
+        Endpoint for getting a list of all ride offers
+        ---
+        tags:
+          - Ride
+        responses:
+          200:
+            description: Fetch successfull
+          204:
+            description: There are no rides offers yet'
+        """
         try:
             self.cursor.execute('SELECT * FROM ride;')
         except (Exception, psycopg2.DatabaseError) as error:
@@ -56,12 +67,71 @@ class RideListResource(Resource):
             return {'status': 'failed', 'data': error}, 500
         ride_list = self.cursor.fetchall()
         if len(ride_list) == 0:
-            return {'status': 'success', 'message': 'There are no rides offers yet'}
+            return {'status': 'success', 'message': 'There are no rides offers yet'}, 204
         else:
-            return {'status': 'success', 'data': ride_list}
+            return {'status': 'success', 'message': 'Fetch successful', 'data': ride_list}
 
         # POST method for new ride request
     def post(self):
+        """
+        Endpoint for creating a ride offer
+        ---
+        tags:
+          - Ride
+        parameters:
+          - name: body
+            in: body
+            required: true
+            schema:
+              id: Ride
+              required:
+                - date
+                - time
+                - pickup
+                - dropoff
+                - capacity
+                - seats_available
+                - driver_id
+                - registration
+                - price
+                - status
+              properties:
+                date:
+                  type: string
+                  description: Date the ride will be taken.
+                time:
+                  type: string
+                  description: Time the ride will start.
+                pickup:
+                  type: string
+                  description: Place the ride will be taken from.
+                dropoff:
+                  type: string
+                  description: Destination of the ride.
+                capacity:
+                  type: string
+                  description: The car's passenger capacity.
+                seats_available:
+                  type: string
+                  description: The seats that are still on offer.
+                driver_id:
+                  type: string
+                  description: Unique identifier of the driver.
+                registration:
+                  type: string
+                  description: The car's licence plate.
+                price:
+                  type: string
+                  description: The price of the ride.
+                status:
+                  type: string
+                  description: The status of the ride.
+        responses:
+          201:
+            description: Ride creation successful
+            schema:
+              $ref: '#/definitions/Ride'
+        """
         args = self.reqparse.parse_args()
         try:
             self.cursor.execute(
@@ -94,8 +164,8 @@ class RideListResource(Resource):
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        return {'status': 'success', 'data': args}, 201
+            return {'status': 'failed', 'message': error}, 500
+        return {'status': 'success', 'message': 'Ride creation successful'}, 201
 
 
 class RideResource(Resource):
@@ -140,6 +210,65 @@ class RideResource(Resource):
 
     # PUT method for editing a ride request
     def put(self, ride_id):
+        """
+        Endpoint for updating a ride offer
+        ---
+        tags:
+          - Ride
+        parameters:
+          - name: body
+            in: body
+            required: true
+            schema:
+              id: Ride
+              required:
+                - date
+                - time
+                - pickup
+                - dropoff
+                - capacity
+                - seats_available
+                - driver_id
+                - registration
+                - price
+                - status
+              properties:
+                date:
+                  type: string
+                  description: Date the ride will be taken.
+                time:
+                  type: string
+                  description: Time the ride will start.
+                pickup:
+                  type: string
+                  description: Place the ride will be taken from.
+                dropoff:
+                  type: string
+                  description: Destination of the ride.
+                capacity:
+                  type: string
+                  description: The car's passenger capacity.
+                seats_available:
+                  type: string
+                  description: The seats that are still on offer.
+                driver_id:
+                  type: string
+                  description: Unique identifier of the driver.
+                registration:
+                  type: string
+                  description: The car's licence plate.
+                price:
+                  type: string
+                  description: The price of the ride.
+                status:
+                  type: string
+                  description: The status of the ride.
+        responses:
+          201:
+            description: Ride creation successful
+            schema:
+              $ref: '#/definitions/Ride'
+        """
         self.abort_if_ride_doesnt_exist(ride_id)
         args = self.reqparse.parse_args()
         try:
@@ -179,12 +308,42 @@ class RideResource(Resource):
         
     # GET method for a ride request
     def get(self, ride_id):
+        """
+        Endpoint for getting a ride offer's details
+        ---
+        tags:
+          - Ride
+        parameters:
+          - name: ride_id
+            in: path
+            required: true
+        responses:
+          200:
+            description: Fetch successfull
+          404:
+            description: There ride offer does not exist
+        """
         request = self.abort_if_ride_doesnt_exist(ride_id)
-        return {'data': request}
+        return {'status':'success', 'message': 'Fetch successful', 'data': request}
 
 
     # DELETE method for deleting a ride request
     def delete(self, ride_id):
+        """
+        Endpoint for deleting a ride
+        ---
+        tags:
+          - Ride
+        parameters:
+          - name: ride_id
+            in: path
+            required: true
+        responses:
+          200:
+            description: Ride successfully deleted
+          404:
+            description: The ride offer does not exist
+        """
         self.abort_if_ride_doesnt_exist(ride_id)
         try:
             self.cursor.execute('DELETE FROM ride WHERE id = %s ;',
@@ -229,6 +388,4 @@ api.add_resource(
     RideListResource, 
     '/api/v2/rides',
     '/api/v2/rides/',
-    '/api/v2/rides/<ride_id>',
-    '/api/v2/rides/<ride_id>/'
     )

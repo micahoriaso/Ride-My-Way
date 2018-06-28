@@ -35,22 +35,27 @@ pytest
 
 Endpoint | Functionality 
 ------------ | -------------
-POST   /api/v1/rides | Create a ride offer
-GET   /api/v1/rides | Get all rides
-GET   /api/v1/rides/<ride_id> | Get a single ride offer
-PUT   /api/v1/rides/<ride_id> | Update a single ride offer
-DELETE   /api/v1/rides/<ride_id> | Delete a ride offer
-POST   /api/v1/rides/<ride_id>/requests | Create a request for a particular ride
-GET   /api/v1/rides/<ride_id>/requests | Get all requests for a particular ride
-GET   /api/v1/rides/<ride_id>/requests/<request_id> | Get a ride request
-PUT  /api/v1/rides/<ride_id>/requests/<request_id> | Update a ride request
-DELETE   /api/v1/rides/<ride_id>/requests/<request_id> | Delete a single request
+POST   /api/v2/rides | Create a ride offer
+GET   /api/v2/rides | Get all rides
+GET   /api/v2/rides/<ride_id> | Get a single ride offer
+PUT   /api/v2/rides/<ride_id> | Update a single ride offer
+DELETE   /api/v2/rides/<ride_id> | Delete a ride offer
+POST   /api/v2/rides/<ride_id>/requests | Create a request for a particular ride
+GET   /api/v2/rides/<ride_id>/requests | Get all requests for a particular ride
+GET   /api/v2/rides/<ride_id>/requests/<request_id> | Get a ride request
+PUT  /api/v2/rides/<ride_id>/requests/<request_id> | Update a ride request
+DELETE   /api/v2/rides/<ride_id>/requests/<request_id> | Delete a single request
+POST /api/v2/auth/signup | Signs up a user
+POST /api/v2/auth/login | Logs in up a user
+GET /api/v2/users/<user_id> | Gets details of a user
+DELETE /api/v2/users/<user_id> | Deletes a user
+PUT /api/v2/users/<user_id> | Updates a user's details
 
 ### Create A ride
 
 Below is an example of a request to create a ride. 
 ```
-/api/v1/rides/
+/api/v2/rides/
 ```
 Payload
 ```
@@ -93,16 +98,16 @@ The following response will be returned
 Below is an example of a *get* request endpoint to get the all ride offers
 
 ```
-/api/v1/rides/
+/api/v2/rides/
 ```
 ### Get a ride offer by id
 To get a ride offer its id by use, in doing so, make sure you have added atleast on ride offer
 ```
-/api/v1/rides/<ride_id>
+/api/v2/rides/<ride_id>
 ```
 eg
 ```
-/api/v1/rides/1
+/api/v2/rides/1
 ```
 The following response will be returned.
 ```
@@ -127,11 +132,11 @@ The following response will be returned.
 ### Edit a ride offer
 Send a `PUT` request in this syntax, make sure to have added at least on ride offer
 ```
-/api/v1/rides/<ride_id>
+/api/v2/rides/<ride_id>
 ```
 e.g.
 ```
-/api/v1/rides/1
+/api/v2/rides/1
 ```
 Payload
 ```
@@ -143,11 +148,11 @@ Payload
 ### Delete a Ride Offer
 Send a `Delete`request with the ride Id as shown below. Make sure to have added at least on ride offer
 ```
-/api/v1/rides/<ride_id>
+/api/v2/rides/<ride_id>
 ```
 e.g.
 ```
-/api/v1/rides/1
+/api/v2/rides/1
 ```
 
 ## Ride Requests
@@ -157,28 +162,28 @@ You can also add, edit, update and delete ride requests.
 Get all the requests of a ride by
 specifying the ride id.
 ```
-/api/v1/rides/<ride_id>/requests
+/api/v2/rides/<ride_id>/requests
 ```
 e.g.
 ```
-/api/v1/rides/1/requests
+/api/v2/rides/1/requests
 ```
 
 ### Get request for a ride
 Use the endpoint below, make sure to have added atleast one ride request
 ```
-/api/v1/rides/<ride_id>/requests/<request_id>
+/api/v2/rides/<ride_id>/requests/<request_id>
 ```
 e.g.
 
 ### Add request to ride
 Send a Json payload to the following endpoint
 ```
-api/v1/rides/<ride_id>/requests
+api/v2/rides/<ride_id>/requests
 ```
 e.g.
 ```
-api/v1/rides/1/requests
+api/v2/rides/1/requests
 ```
 Example Json payload
 ```
@@ -191,11 +196,11 @@ Example Json payload
 A ride request can be editied by sending a `PUT` request
 with a Json payload  to the following endpoint. Make sure to have added at least one ride request
 ```
-/api/v1/rides/<ride_id>/requests/<request_id>
+/api/v2/rides/<ride_id>/requests/<request_id>
 ```
 e.g.
 ```
-/api/v1/rides/2/requests/1
+/api/v2/rides/2/requests/1
 ```
 Json payload
 ```
@@ -207,11 +212,11 @@ Json payload
 To delete a request from a ride offer, send a `DELETE`
 request to the following endpoint. Make sure to have added at least one ride request
 ```
-/api/v1/rides/<ride_id>/requests/<request_id>
+/api/v2/rides/<ride_id>/requests/<request_id>
 ```
 e.g.
 ```
-/api/v1/rides/2/requests/1
+/api/v2/rides/2/requests/1
 ```
 
 # Author
