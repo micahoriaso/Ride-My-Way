@@ -11,7 +11,7 @@ before_script:
 # command for creating a role and a database
   - psql -c "CREATE ROLE oriaso WITH SUPERUSER LOGIN PASSWORD 'root100';" -U postgres
   - psql -c 'create database ride_my_way;' -U postgres
-  - python flaskr/db.py
+  - psql -c 'GRANT ALL PRIVILEGES ON DATABASE ride_my_way TO oriaso;' -U postgres
 
 # command to run tests
 script: coverage run -m pytest
