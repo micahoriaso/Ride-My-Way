@@ -20,42 +20,44 @@ data = {
     '3': {
         'requestor_id': 13,
         'request_status': 'Accepted'
+    },
+    '4': {
+        'date': '12-06-2018',
+        'time': '11:00',
+        'pickup': 'Nyayo Stadium',
+        'dropoff': 'Belle Vue',
+        'price': '100',
+        'capacity': '3',
+        'available_seats': '1',
+        'driver_id': 1,
+        'car': 'Mazda MX5',
+        'registration': 'KAA 987I'
     }
 }
 
-
-def test_get_all_requests(client):
-    response = client.get('/api/v1/rides/2/requests')
-    assert response.status_code == 200
-
 def test_add_new_ride_offer_request(client):
-    response = client.post('/api/v1/rides/2/requests', data = json.dumps(data['3']), headers=headers) 
+    client.post('/api/v2/rides/', data=json.dumps(data['4']), headers=headers)
+    response = client.post('/api/v2/rides/1/requests', data = json.dumps(data['3']), headers=headers) 
     assert response.status_code == 201
 
+def test_get_all_requests(client):
+    response = client.get('/api/v2/rides/1/requests')
+    assert response.status_code == 200
+
+
 def test_edit_existing_ride_offer_request(client):
-    response = client.post('/api/v1/rides/2/requests',
+    response = client.post('/api/v2/rides/1/requests',
                            data=json.dumps(data['3']), headers=headers)
     response = client.put(
-        '/api/v1/rides/2/requests/1', data=json.dumps(data['3']), headers=headers)
+        '/api/v2/rides/1/requests/1', data=json.dumps(data['3']), headers=headers)
     assert response.status_code == 200
 
 def test_delete_existing_ride_offer_request(client):
-    response = client.post('/api/v1/rides/2/requests',
+    response = client.post('/api/v2/rides/1/requests',
                            data=json.dumps(data['3']), headers=headers)
-    response = client.delete('/api/v1/rides/2/requests/1')
+    response = client.delete('/api/v2/rides/1/requests/1')
     assert response.status_code == 200
 
 def test_delete_nonexistent_ride_offer_request(client):
-    response = client.delete('/api/v1/rides/2/requests/10')
+    response = client.delete('/api/v2/rides/1/requests/10')
     assert response.status_code == 404
-
-# API V2
-# def test_add_new_ride_request_with_db(client):
-#     response = client.post('/api/v2/rides/1/requests',
-#                            data=json.dumps(data['3']), headers=headers)
-#     assert response.status_code == 201
-
-# def test_add_new_ride_request_for_nonexisting_ride_offer_with_db(client):
-#     response = client.post('/api/v2/rides/1000/requests',
-#                            data=json.dumps(data['3']), headers=headers)
-#     assert response.status_code == 404
