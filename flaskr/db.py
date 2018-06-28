@@ -11,10 +11,10 @@ def connectDB():
 
 def create_db_tables():
     queries = [
-        'DROP TABLE "ride" CASCADE',
-        'DROP TABLE "ride_request" CASCADE',
-        'DROP TABLE "app_user" CASCADE',
-        'DROP TABLE "car" CASCADE',
+        'DROP TABLE IF EXISTS "ride" CASCADE',
+        'DROP TABLE IF EXISTS "ride_request" CASCADE',
+        'DROP TABLE IF EXISTS "app_user" CASCADE',
+        'DROP TABLE IF EXISTS "car" CASCADE',
         """
         CREATE TABLE ride (
             id SERIAL PRIMARY KEY NOT NULL, 
