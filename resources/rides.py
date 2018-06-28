@@ -139,8 +139,8 @@ class RideResource(Resource):
         return ride
 
 
-rides_v1_bp = Blueprint('resourcesV1.rides', __name__)
-api = Api(rides_v1_bp)
+rides_bp = Blueprint('resourcesV1.rides', __name__)
+api = Api(rides_bp)
 api.add_resource(
     RideResource, 
     '/api/v1/rides/<ride_id>',
