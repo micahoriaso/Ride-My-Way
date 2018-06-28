@@ -124,6 +124,24 @@ class RideResource(Resource):
             cursor_factory=psycopg2.extras.DictCursor)
         super(RideResource, self).__init__()
 
+        
+    # GET method for a ride request
+    def get(self, ride_id):
+        request = self.abort_if_ride_doesnt_exist(ride_id)
+        return {'data': request}
+
+    def abort_if_ride_doesnt_exist(self, ride_id):
+        try:
+            self.cursor.execute('SELECT * FROM ride WHERE id = %s ;',
+                                ([ride_id]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = self.cursor.fetchone()
+        if results is None:
+            abort(404, message='The ride with id {} does not exist'.format(ride_id))
+        return results
+
         # DELETE method for deleting a ride request
     def delete(self, ride_id):
         self.abort_if_ride_doesnt_exist(ride_id)
@@ -135,6 +153,7 @@ class RideResource(Resource):
             self.connection.rollback()
             return {'status': 'failed', 'data': error}, 200
         return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
+
 
 
     def abort_if_ride_doesnt_exist(self, ride_id):
