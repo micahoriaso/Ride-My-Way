@@ -330,8 +330,8 @@ class UserResource(Resource):
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'message': error}, 500
-        return {'status': 'success', 'message': 'Update successful'}, 201
+            return {'status': 'failed', 'data': error}, 500
+        return {'status': 'success', 'data': args}, 200
 
     def abort_if_user_doesnt_exist(self, user_id):
         try:
