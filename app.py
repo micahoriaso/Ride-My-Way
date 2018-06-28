@@ -12,4 +12,4 @@ if os.environ['FLASK_ENV'] == 'production':
 else:
     configuration = config.DevelopmentConfig()
 
-app = create_app(configuration)
+app = create_app()
