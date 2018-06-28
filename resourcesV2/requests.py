@@ -80,6 +80,11 @@ class RequestResource(Resource):
             cursor_factory=psycopg2.extras.DictCursor)
         super(RequestResource, self).__init__()
 
+    # GET method for a ride request
+    def get(self, ride_id, request_id):
+        request = self.abort_if_ride_request_doesnt_exist(request_id)
+        return {'data': request}
+      
     # PUT method for editing a ride request
     def put(self, ride_id, request_id):
         self.abort_if_ride_request_doesnt_exist(request_id)
@@ -93,6 +98,7 @@ class RequestResource(Resource):
             return {'status': 'failed', 'data': error}, 200
         return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
 
+
     def abort_if_ride_request_doesnt_exist(self, request_id):
         try:
             self.cursor.execute('SELECT * FROM ride_request WHERE id = %s ;',
@@ -102,7 +108,7 @@ class RequestResource(Resource):
             return {'status': 'failed', 'data': error}, 500
         results = self.cursor.fetchone()
         if results is None:
-            abort(404, message='The ride request {} does not exist'.format(request_id))
+            abort(404, message='The ride request with id {} does not exist'.format(request_id))
         return results
 
 
