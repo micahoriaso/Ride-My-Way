@@ -86,6 +86,12 @@ class RequestResource(Resource):
         try:
             self.cursor.execute('DELETE FROM ride_request WHERE id = %s ;',
                                 ([request_id]))
+            self.connection.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.connection.rollback()
+            return {'status': 'failed', 'data': error}, 200
+
+        return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
 
     # GET method for a ride request
     def get(self, ride_id, request_id):
@@ -98,14 +104,14 @@ class RequestResource(Resource):
         args = self.reqparse.parse_args()
         try:
             self.cursor.execute('UPDATE ride_request SET request_status = %s WHERE id = %s;',
-                                (args['request_status'], [request_id]))
+                                (args['request_status'], request_id))
 
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
             return {'status': 'failed', 'data': error}, 200
 
-        return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
+        return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
 
     def abort_if_ride_request_doesnt_exist(self, request_id):
         try:

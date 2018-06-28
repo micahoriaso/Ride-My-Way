@@ -183,24 +183,22 @@ class RideResource(Resource):
         return {'data': request}
 
 
-    def abort_if_ride_doesnt_exist(self, ride_id):
-        try:
-            self.cursor.execute('SELECT * FROM ride WHERE id = %s ;',
-                                ([ride_id]))
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        results = self.cursor.fetchone()
-        if results is None:
-            abort(404, message='The ride with id {} does not exist'.format(ride_id))
-        return results
-
-
     # DELETE method for deleting a ride request
     def delete(self, ride_id):
         self.abort_if_ride_doesnt_exist(ride_id)
         try:
             self.cursor.execute('DELETE FROM ride WHERE id = %s ;',
+                                ([ride_id]))
+            self.connection.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.connection.rollback()
+            return {'status': 'failed', 'data': error}, 200
+        self.delete_this_rides_requests(ride_id)
+        return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
+
+    def delete_this_rides_requests(self, ride_id):
+        try:
+            self.cursor.execute('DELETE FROM ride_request WHERE ride_id = %s ;',
                                 ([ride_id]))
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:

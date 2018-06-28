@@ -143,6 +143,18 @@ class UserResource(Resource):
             cursor_factory=psycopg2.extras.DictCursor)
         super(UserResource, self).__init__()
 
+    # DELETE method for deleting a user
+    def delete(self, user_id):
+        self.abort_if_user_doesnt_exist(user_id)
+        try:
+            self.cursor.execute('DELETE FROM app_user WHERE id = %s ;',
+                                ([user_id]))
+            self.connection.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.connection.rollback()
+            return {'status': 'failed', 'data': error}, 200
+        return {'status': 'success', 'data': 'User successfully deleted'}, 200
+
     # GET method for a user
     def get(self, user_id):
         request = self.abort_if_user_doesnt_exist(user_id)
@@ -192,18 +204,17 @@ class UserResource(Resource):
 users_v2_bp = Blueprint('resourcesV2.users', __name__)
 api = Api(users_v2_bp)
 api.add_resource(
-    UserListResource, 
+    UserListResource,
     '/api/v2/auth/signup',
     '/api/v2/auth/signup/'
-    )
+)
 api.add_resource(
-    LoginResource, 
+    LoginResource,
     '/api/v2/auth/login',
     '/api/v2/auth/login'
-    )
+)
 api.add_resource(
-    UserResource, 
+    UserResource,
     '/api/v2/users/<user_id>',
     '/api/v2/users/<user_id>'
-    )
-
+)
