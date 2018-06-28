@@ -26,6 +26,7 @@ data = {
     },
     '4': {
         "firstname": "Mike",
+        "lastname": "Mike",
     },
     '5': {
         "firstname": "Sharon",
@@ -38,45 +39,44 @@ data = {
 
 
 def test_signup(client):
-    response = client.post('/api/v1/auth/signup', data = json.dumps(data['5']), headers = headers)
+    response = client.post('/api/v2/auth/signup', data = json.dumps(data['5']), headers = headers)
     assert response.status_code == 201
 
-
 def test_edit_user(client):
-    response = client.post('/api/v1/auth/signup',
+    response = client.post('/api/v2/auth/signup',
                            data=json.dumps(data['1']), headers=headers)
     response = client.put(
-        '/api/v1/users/1', data=json.dumps(data['4']), headers=headers)
+        '/api/v2/users/2', data=json.dumps(data['4']), headers=headers)
     assert response.status_code == 200
 
 def test_get_one_existing_user(client):
-    response = client.post('/api/v1/auth/signup',
+    response = client.post('/api/v2/auth/signup',
                            data=json.dumps(data['1']), headers=headers)
-    response = client.get('/api/v1/users/1')
+    response = client.get('/api/v2/users/1')
     assert response.status_code == 200
 
 def test_get_one_nonexisting_user(client):
-    response = client.get('/api/v1/users/900')
+    response = client.get('/api/v2/users/900')
+    assert response.status_code == 404
+
+def test_delete_nonexistent_user(client):
+    response = client.delete('/api/v2/users/555')
     assert response.status_code == 404
 
 def test_delete_existing_user(client):
-    response = client.delete('/api/v1/users/1')
+    response = client.delete('/api/v2/users/1')
     assert response.status_code == 200
 
-def test_delete_nonexistent_user(client):
-    response = client.delete('/api/v1/users/555')
-    assert response.status_code == 404
-
 def test_login_with_good_credentials(client):
-    client.post('/api/v1/auth/signup',
+    client.post('/api/v2/auth/signup',
                 data=json.dumps(data['1']), headers=headers)
-    response = client.post('/api/v1/auth/login',
+    response = client.post('/api/v2/auth/login',
                            data=json.dumps(data['2']), headers=headers)
     assert response.status_code == 200
 
 def test_login_with_bad_credentials(client):
-    client.post('/api/v1/auth/signup',
+    client.post('/api/v2/auth/signup',
                 data=json.dumps(data['1']), headers=headers)
-    response = client.post('/api/v1/auth/login',
+    response = client.post('/api/v2/auth/login',
                            data=json.dumps(data['3']), headers=headers)
     assert response.status_code == 400
