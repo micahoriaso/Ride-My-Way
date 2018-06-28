@@ -124,11 +124,51 @@ class RideResource(Resource):
             cursor_factory=psycopg2.extras.DictCursor)
         super(RideResource, self).__init__()
 
+
+    # PUT method for editing a ride request
+    def put(self, ride_id):
+        self.abort_if_ride_doesnt_exist(ride_id)
+        args = self.reqparse.parse_args()
+        try:
+            self.cursor.execute(
+                """UPDATE ride SET 
+                    date = %s,
+                    time = %s,
+                    pickup = %s,
+                    dropoff = %s,
+                    capacity = %s,
+                    seats_available = %s,
+                    driver_id = %s,
+                    registration = %s,
+                    price = %s,
+                    status = %s
+                 WHERE id = %s;""",
+                (
+                    args['date'], 
+                    args['time'], 
+                    args['pickup'], 
+                    args['dropoff'], 
+                    args['capacity'], 
+                    args['available_seats'], 
+                    args['driver_id'], 
+                    args['registration'], 
+                    args['price'], 
+                    args['status'], 
+                    ride_id
+                )
+            )
+            self.connection.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.connection.rollback()
+            return {'status': 'failed', 'data': error}, 200
+        return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
+
         
     # GET method for a ride request
     def get(self, ride_id):
         request = self.abort_if_ride_doesnt_exist(ride_id)
         return {'data': request}
+
 
     def abort_if_ride_doesnt_exist(self, ride_id):
         try:
@@ -142,7 +182,8 @@ class RideResource(Resource):
             abort(404, message='The ride with id {} does not exist'.format(ride_id))
         return results
 
-        # DELETE method for deleting a ride request
+
+    # DELETE method for deleting a ride request
     def delete(self, ride_id):
         self.abort_if_ride_doesnt_exist(ride_id)
         try:
@@ -153,8 +194,6 @@ class RideResource(Resource):
             self.connection.rollback()
             return {'status': 'failed', 'data': error}, 200
         return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
-
-
 
     def abort_if_ride_doesnt_exist(self, ride_id):
             try:
