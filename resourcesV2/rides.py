@@ -47,6 +47,19 @@ class RideListResource(Resource):
             cursor_factory=psycopg2.extras.DictCursor)
         super(RideListResource, self).__init__()
 
+    # GET method for ride list
+    def get(self):
+        try:
+            self.cursor.execute('SELECT * FROM ride;')
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        ride_list = self.cursor.fetchall()
+        if len(ride_list) == 0:
+            return {'status': 'success', 'message': 'There are no rides offers yet'}
+        else:
+            return {'status': 'success', 'data': ride_list}
+
         # POST method for new ride request
     def post(self):
         args = self.reqparse.parse_args()
