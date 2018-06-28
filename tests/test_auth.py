@@ -68,15 +68,11 @@ def test_delete_existing_user(client):
     assert response.status_code == 200
 
 def test_login_with_good_credentials(client):
-    client.post('/api/v2/auth/signup',
-                data=json.dumps(data['1']), headers=headers)
     response = client.post('/api/v2/auth/login',
                            data=json.dumps(data['2']), headers=headers)
     assert response.status_code == 200
 
 def test_login_with_bad_credentials(client):
-    client.post('/api/v2/auth/signup',
-                data=json.dumps(data['1']), headers=headers)
     response = client.post('/api/v2/auth/login',
                            data=json.dumps(data['3']), headers=headers)
-    assert response.status_code == 400
+    assert response.status_code == 202
