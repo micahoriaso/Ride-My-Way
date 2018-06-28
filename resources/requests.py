@@ -126,8 +126,8 @@ class RequestResource(Resource):
         return results
 
 
-requests_v2_bp = Blueprint('resourcesV2.requests', __name__)
-api = Api(requests_v2_bp)
+requests_bp = Blueprint('resourcesV2.requests', __name__)
+api = Api(requests_bp)
 api.add_resource(
     RequestResource, 
     '/api/v2/rides/<ride_id>/requests/<request_id>',

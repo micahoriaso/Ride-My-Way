@@ -218,8 +218,8 @@ class RideResource(Resource):
                 abort(404, message='The ride with id {} does not exist'.format(ride_id))
             return results
 
-rides_v2_bp = Blueprint('resourcesV2.rides', __name__)
-api = Api(rides_v2_bp)
+rides_bp = Blueprint('resourcesV2.rides', __name__)
+api = Api(rides_bp)
 api.add_resource(
     RideResource, 
     '/api/v2/rides/<ride_id>',

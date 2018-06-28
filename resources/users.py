@@ -201,8 +201,8 @@ class UserResource(Resource):
         return results
 
 
-users_v2_bp = Blueprint('resourcesV2.users', __name__)
-api = Api(users_v2_bp)
+users_bp = Blueprint('resourcesV2.users', __name__)
+api = Api(users_bp)
 api.add_resource(
     UserListResource,
     '/api/v2/auth/signup',
