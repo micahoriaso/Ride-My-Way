@@ -37,7 +37,8 @@ data = {
 
 
 def test_add_new_ride_offer(client):
-    response = client.post('/api/v2/rides/', data = json.dumps(data['4']), headers=headers) 
+    response = client.post('/api/v2/rides/', 
+                            data = json.dumps(data['4']), headers=headers) 
     assert response.status_code == 201
 
 def test_get_all_rides(client):
@@ -45,7 +46,8 @@ def test_get_all_rides(client):
     assert response.status_code == 200
 
 def test_get_one_available_ride(client):
-    response = client.post('/api/v2/rides/', data=json.dumps(data['4']), headers=headers)
+    response = client.post('/api/v2/rides/', 
+                            data=json.dumps(data['4']), headers=headers)
     response = client.get('/api/v2/rides/1')
     assert response.status_code == 200
 
@@ -54,7 +56,8 @@ def test_get_one_unavailable_ride(client):
     assert response.status_code == 404
 
 def test_edit_existing_ride_offer(client):
-    response = client.put('/api/v2/rides/1', data = json.dumps(data['1']), headers=headers) 
+    response = client.put('/api/v2/rides/1', 
+                            data = json.dumps(data['1']), headers=headers) 
     assert response.status_code == 200
 
 def test_delete_existing_ride(client):

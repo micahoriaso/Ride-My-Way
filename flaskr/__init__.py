@@ -11,7 +11,6 @@ from resources.users import users_bp
 def create_app():
     # Create an instance of the flask application
     app = Flask(__name__)
-    # app.config.from_object(configObject)
     app.config['SWAGGER'] = {
         'title': 'Ride My Way',
         'uiversion': 3

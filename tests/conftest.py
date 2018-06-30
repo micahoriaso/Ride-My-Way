@@ -5,9 +5,7 @@ from flaskr.db import create_db_tables
 
 @pytest.fixture
 def app():
-    app = create_app({
-        'TESTING': True,
-    })
+    app = create_app()
     yield app
 
 

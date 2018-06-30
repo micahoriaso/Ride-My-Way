@@ -39,7 +39,8 @@ data = {
 
 
 def test_signup(client):
-    response = client.post('/api/v2/auth/signup', data = json.dumps(data['5']), headers = headers)
+    response = client.post('/api/v2/auth/signup', 
+                            data = json.dumps(data['5']), headers = headers)
     assert response.status_code == 201
 
 def test_edit_user(client):

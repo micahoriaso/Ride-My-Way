@@ -37,7 +37,8 @@ data = {
 
 def test_add_new_ride_offer_request(client):
     client.post('/api/v2/rides/', data=json.dumps(data['4']), headers=headers)
-    response = client.post('/api/v2/rides/1/requests', data = json.dumps(data['3']), headers=headers) 
+    response = client.post('/api/v2/rides/1/requests', 
+                            data = json.dumps(data['3']), headers=headers) 
     assert response.status_code == 201
 
 def test_get_all_requests(client):
