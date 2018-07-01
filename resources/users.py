@@ -8,6 +8,10 @@ from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from flask_jwt_extended import (create_access_token, 
+create_refresh_token, jwt_required, jwt_refresh_token_required,
+get_jwt_identity, get_raw_jwt)
+
 from flaskr.db import connectDB
 
 from resources.helpers import match_email, strip_whitespace
@@ -123,7 +127,14 @@ class UserListResource(Resource):
                     except (Exception, psycopg2.DatabaseError) as error:
                         self.connection.rollback()
                         return {'status': 'failed', 'message': error}, 500
-                    return {'status': 'success', 'message': 'Account creation successful'}, 201
+                    access_token = create_access_token(identity= args['email'])
+                    refresh_token = create_refresh_token(identity= args['email'])
+                    return {
+                        'status': 'success', 
+                        'message': 'Account creation successful',
+                        'access_token': access_token,
+                        'refresh_token': refresh_token
+                        }, 201
                 return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
             return {'status': 'failed', 'message': 'Password and confirm password do not match, try again'}, 202
         return {'status': 'failed', 'message': 'Invalid email address, try again'}, 202
@@ -198,7 +209,16 @@ class LoginResource(Resource):
         results = self.cursor.fetchone()
         if results is not None:
             if results['email'] == args['email'] and check_password_hash(results['password'], args['password']):
-                return {'status': 'success', 'message': 'Login successful'}, 200
+                access_token = create_access_token(
+                    identity=args['email'])
+                refresh_token = create_refresh_token(
+                    identity= args['email'])
+                return {
+                    'status': 'success', 
+                    'message': 'Login successful',
+                    'access_token': access_token,
+                    'refresh_token': refresh_token
+                }, 200
             return {'status': 'failed', 'message': 'Invalid email/password combination'}, 202
         else:
             abort(404, message='The user with email {} does not exist'.format(
@@ -230,6 +250,7 @@ class UserResource(Resource):
         super(UserResource, self).__init__()
 
     # DELETE method for deleting a user
+    @jwt_required
     def delete(self, user_id):
         """
         Endpoint for deleting a user's profile
@@ -259,6 +280,7 @@ class UserResource(Resource):
         return {'status': 'success', 'message': 'User successfully deleted'}, 200
 
     # GET method for a user
+    @jwt_required
     def get(self, user_id):
         """
         Endpoint for viewing a user's details
@@ -281,6 +303,7 @@ class UserResource(Resource):
         return {'status': 'success', 'message': 'Fetch successful', 'data': request}
 
     # PUT method for updating user
+    @jwt_required
     def put(self, user_id):
         """
         Endpoint for user profile update
@@ -372,6 +395,14 @@ class UserResource(Resource):
         if results is None:
             abort(404, message='The user with id {} does not exist'.format(user_id))
         return results
+
+
+class TokenRefresh(Resource):
+    @jwt_refresh_token_required
+    def post(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return {'access_token': access_token}
 
 
 users_bp = Blueprint('resources.users', __name__)
