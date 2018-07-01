@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from resources.requests import requests_bp
 from resources.rides import rides_bp
 from resources.users import users_bp
+from resources.cars import cars_bp
 
 def create_app():
     # Create an instance of the flask application
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(requests_bp)
     app.register_blueprint(rides_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(cars_bp)
 
     if __name__ == '__main__':
         app.run(debug=True)
