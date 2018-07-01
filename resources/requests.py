@@ -5,6 +5,8 @@ from flask import Blueprint
 
 from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
+from flask_jwt_extended import jwt_required
+
 from flaskr.db import connectDB
 
 
@@ -28,6 +30,7 @@ class RequestListResource(Resource):
         super(RequestListResource, self).__init__()
 
     # GET method for ride requests list
+    @jwt_required
     def get(self, ride_id):
         """
         Endpoint for getting a list of all ride requests for a particular ride
@@ -58,6 +61,7 @@ class RequestListResource(Resource):
             return {'status': 'success', 'message': 'Fetch successful','data': ride_offer_request}
 
     # POST method for new ride request
+    @jwt_required
     def post(self, ride_id):
         """
         Endpoint for creating a ride request
@@ -129,6 +133,7 @@ class RequestResource(Resource):
         super(RequestResource, self).__init__()
 
     # DELETE method for deleting a ride request
+    @jwt_required
     def delete(self, ride_id, request_id):
         """
         Endpoint for deleting a ride request
@@ -161,6 +166,7 @@ class RequestResource(Resource):
         return {'status': 'success', 'message': 'Ride request successfully deleted'}, 200
 
     # GET method for a ride request
+    @jwt_required
     def get(self, ride_id, request_id):
         """
         Endpoint for getting a ride offer requests's details
@@ -185,6 +191,7 @@ class RequestResource(Resource):
         return {'status': 'success', 'message': 'Fetch successful', 'data': request}
       
     
+    @jwt_required
     def put(self, ride_id, request_id):
         # PUT method for editing a ride request
         """
