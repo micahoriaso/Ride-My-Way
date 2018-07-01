@@ -27,6 +27,8 @@ data = {
     '4': {
         "firstname": "Mike",
         "lastname": "Mike",
+        "phone_number": "0777895621",
+        "password": "10101010",
     },
     '5': {
         "firstname": "Sharon",

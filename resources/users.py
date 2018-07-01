@@ -209,10 +209,10 @@ class UserResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'firstname', type=str, location='json', required=True
+            'firstname', type=str, required=True, help='Please enter firstname', location='json'
         )
         self.reqparse.add_argument(
-            'lastname', type=str, location='json', required=True
+            'lastname', type=str, required=True, help='Please enter lastname', location='json'
         )
         self.reqparse.add_argument(
             'car_registration', location='json'
@@ -221,7 +221,7 @@ class UserResource(Resource):
             'phone_number', location='json'
         )
         self.reqparse.add_argument(
-            'password', type=str, location='json', required=True
+            'password', type=str, required=True, help='Please enter password', location='json'
         )
 
         self.connection = connectDB()
