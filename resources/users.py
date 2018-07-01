@@ -1,6 +1,7 @@
 import psycopg2
 import psycopg2.extras
 
+
 from flask import Blueprint
 
 from flask_restful import Resource, reqparse, fields, marshal, abort, Api
@@ -9,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from flaskr.db import connectDB
 
-# from flasgger import Swagger, swag_from
+from resources.helpers import match_email, strip_whitespace
 
 
 class UserListResource(Resource):
@@ -26,6 +27,9 @@ class UserListResource(Resource):
         )
         self.reqparse.add_argument(
             'car_registration', type=str, default='', location='json'
+        )
+        self.reqparse.add_argument(
+            'phone_number', type=str, default='', location='json'
         )
         self.reqparse.add_argument(
             'password', type=str, required=True, help='Please enter password', location='json'
@@ -85,40 +89,44 @@ class UserListResource(Resource):
   
         args = self.reqparse.parse_args()
         self.abort_if_email_is_already_used(args['email'])
-        if args['password'] == args['confirm_password']:
-            if len(args['password']) >= 8:
-                try:
-                    self.cursor.execute(
-                        """INSERT INTO app_user (
-                            firstname, 
-                            lastname, 
-                            fullname, 
-                            email,
-                            password,
-                            car_registration
+        if match_email(args['email']):
+            if args['password'] == args['confirm_password']:
+                if len(args['password']) >= 8:
+                    try:
+                        self.cursor.execute(
+                            """INSERT INTO app_user (
+                                firstname, 
+                                lastname, 
+                                fullname, 
+                                email,
+                                phone_number,
+                                password,
+                                car_registration
+                                )
+                            VALUES (%s, %s, %s, %s, %s, %s, %s);""",
+                            (
+                                args['firstname'],
+                                args['lastname'],
+                                '{} {}'.format(
+                                    args['firstname'], args['lastname']
+                                    ),
+                                args['email'],
+                                args['phone_number'],
+                                generate_password_hash(
+                                    args['password'], 
+                                    method='sha256'
+                                    ),
+                                args['car_registration']
                             )
-                        VALUES (%s, %s, %s, %s, %s, %s);""",
-                        (
-                            args['firstname'],
-                            args['lastname'],
-                            '{} {}'.format(
-                                args['firstname'], args['lastname']
-                                ),
-                            args['email'],
-                            generate_password_hash(
-                                args['password'], 
-                                method='sha256'
-                                ),
-                            args['car_registration']
                         )
-                    )
-                    self.connection.commit()
-                except (Exception, psycopg2.DatabaseError) as error:
-                    self.connection.rollback()
-                    return {'status': 'failed', 'message': error}, 500
-                return {'status': 'success', 'message': 'Account creation successful'}, 201
-            return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
-        return {'status': 'failed', 'message': 'Password and confirm password do not match, try again'}, 202
+                        self.connection.commit()
+                    except (Exception, psycopg2.DatabaseError) as error:
+                        self.connection.rollback()
+                        return {'status': 'failed', 'message': error}, 500
+                    return {'status': 'success', 'message': 'Account creation successful'}, 201
+                return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
+            return {'status': 'failed', 'message': 'Password and confirm password do not match, try again'}, 202
+        return {'status': 'failed', 'message': 'Invalid email address, try again'}, 202
 
     def abort_if_email_is_already_used(self, email):
         try:
@@ -129,7 +137,7 @@ class UserListResource(Resource):
             return {'status': 'failed', 'data': error}, 500
         results = self.cursor.fetchone()
         if results is not None:
-            abort(202, message='The email {} is already taken'.format(email))
+            abort(400, message='The email {} is already taken'.format(email))
         return results
 
 
@@ -201,7 +209,7 @@ class UserResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'firstname', type=str, required=True, help='Please enter firsname', location='json'
+            'firstname', type=str, required=True, help='Please enter firstname', location='json'
         )
         self.reqparse.add_argument(
             'lastname', type=str, required=True, help='Please enter lastname', location='json'
@@ -210,7 +218,10 @@ class UserResource(Resource):
             'car_registration', location='json'
         )
         self.reqparse.add_argument(
-            'password', type=str, location='json'
+            'phone_number', location='json'
+        )
+        self.reqparse.add_argument(
+            'password', type=str, required=True, help='Please enter password', location='json'
         )
 
         self.connection = connectDB()
@@ -288,7 +299,9 @@ class UserResource(Resource):
               required:
                 - firstname
                 - lastname
+                - password
                 - car_registration
+                - phone_number
               properties:
                 firstname:
                   type: string
@@ -296,9 +309,15 @@ class UserResource(Resource):
                 lastname:
                   type: string
                   description: The user's lastname.
+                password:
+                  type: string
+                  description: The user's password.
                 car_registration:
                   type: string
                   description: The user's car licence plate.
+                phone_number:
+                  type: string
+                  description: The user's phone number.
         responses:
           200:
             description: Update successful
@@ -309,29 +328,38 @@ class UserResource(Resource):
         """
         args = self.reqparse.parse_args()
         self.abort_if_user_doesnt_exist(user_id)
-        try:
-            self.cursor.execute(
-                """UPDATE app_user SET
-                    firstname = %s, 
-                    lastname = %s, 
-                    fullname = %s, 
-                    car_registration = %s 
-                WHERE id = %s;""",
-                (
-                    args['firstname'],
-                    args['lastname'],
-                    '{} {}'.format(
-                        args['firstname'], args['lastname']
-                    ),
-                    args['car_registration'],
-                    int(user_id)
+        if len(args['password']) >= 8:
+            try:
+                self.cursor.execute(
+                    """UPDATE app_user SET
+                        firstname = %s, 
+                        lastname = %s, 
+                        fullname = %s, 
+                        phone_number = %s, 
+                        password = %s, 
+                        car_registration = %s 
+                    WHERE id = %s;""",
+                    (
+                        args['firstname'],
+                        args['lastname'],
+                        '{} {}'.format(
+                            args['firstname'], args['lastname']
+                        ),
+                        args['phone_number'],
+                        generate_password_hash(
+                            args['password'],
+                            method='sha256'
+                        ),
+                        args['car_registration'],
+                        int(user_id)
+                    )
                 )
-            )
-            self.connection.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        return {'status': 'success', 'data': args}, 200
+                self.connection.commit()
+            except (Exception, psycopg2.DatabaseError) as error:
+                self.connection.rollback()
+                return {'status': 'failed', 'data': error}, 500
+            return {'status': 'success', 'data': args}, 200
+        return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
 
     def abort_if_user_doesnt_exist(self, user_id):
         try:
