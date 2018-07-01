@@ -5,12 +5,13 @@ from flask_restful import abort
 
 from flaskr.db import connectDB
 
+
 class Car:
     def __init__(self):
         self.connection = connectDB()
         self.cursor = self.connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
-            
+
     # method returns all cars
     def browse(self):
         try:
@@ -28,7 +29,7 @@ class Car:
     def read(self, car_registration):
         try:
             self.cursor.execute('SELECT * FROM car WHERE id = %s ;',
-                                    ([car_registration]))
+                                ([car_registration]))
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
             return {'status': 'failed', 'data': error}, 500
@@ -106,5 +107,6 @@ class Car:
             return {'status': 'failed', 'data': error}, 500
         results = self.cursor.fetchone()
         if results is None:
-            abort(404, message='The car with licence plate {} does not exist'.format(registration))
+            abort(404, message='The car with licence plate {} does not exist'.format(
+                registration))
         return results

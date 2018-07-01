@@ -14,7 +14,7 @@ get_jwt_identity, get_raw_jwt)
 
 from flaskr.db import connectDB
 
-from resources.helpers import match_email, strip_whitespace
+from flaskr.resources.helpers import match_email, strip_whitespace
 
 
 class UserListResource(Resource):

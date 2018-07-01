@@ -6,10 +6,10 @@ from flasgger import Swagger
 
 from flask_jwt_extended import JWTManager
 
-from resources.requests import requests_bp
-from resources.rides import rides_bp
-from resources.users import users_bp
-from resources.cars import cars_bp
+from flaskr.resources.requests import requests_bp
+from flaskr.resources.rides import rides_bp
+from flaskr.resources.users import users_bp
+from flaskr.resources.cars import cars_bp
 
 def create_app():
     # Create an instance of the flask application

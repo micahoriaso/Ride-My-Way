@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 from flask_jwt_extended import jwt_required
 
-from flaskr.models import Car
+from flaskr.models.car import Car
 
 
 class CarListResource(Resource):
