@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required
 
 from flaskr.models.ride import Ride
 
+from flaskr.resources.helpers import check_for_empty_fields
 
 
 class RideListResource(Resource):
@@ -55,6 +56,8 @@ class RideListResource(Resource):
         ---
         tags:
           - Ride
+        security:
+          - Bearer: []  
         responses:
           200:
             description: Fetch successfull
@@ -71,6 +74,8 @@ class RideListResource(Resource):
         ---
         tags:
           - Ride
+        security:
+          - Bearer: []  
         parameters:
           - name: body
             in: body
@@ -126,6 +131,7 @@ class RideListResource(Resource):
               $ref: '#/definitions/Ride'
         """
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         return self.ride.add(
                     args['date'], 
                     args['time'], 
@@ -187,7 +193,12 @@ class RideResource(Resource):
         ---
         tags:
           - Ride
+        security:
+          - Bearer: []  
         parameters:
+          - name: ride_id
+            in: path
+            required: true
           - name: body
             in: body
             required: true
@@ -243,6 +254,7 @@ class RideResource(Resource):
         """
         self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         return self.ride.edit(
                     args['date'], 
                     args['time'], 
@@ -265,6 +277,8 @@ class RideResource(Resource):
         ---
         tags:
           - Ride
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
@@ -288,6 +302,8 @@ class RideResource(Resource):
         ---
         tags:
           - Ride
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
@@ -305,11 +321,9 @@ rides_bp = Blueprint('resources.rides', __name__)
 api = Api(rides_bp)
 api.add_resource(
     RideResource, 
-    '/api/v2/rides/<ride_id>',
-    '/api/v2/rides/<ride_id>/'
+    '/api/v2/rides/<ride_id>'
 )
 api.add_resource(
     RideListResource, 
-    '/api/v2/rides',
-    '/api/v2/rides/',
+    '/api/v2/rides'
     )

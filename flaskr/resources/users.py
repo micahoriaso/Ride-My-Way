@@ -14,7 +14,7 @@ get_jwt_identity, get_raw_jwt)
 
 from flaskr.db import connectDB
 
-from flaskr.resources.helpers import match_email, strip_whitespace
+from flaskr.resources.helpers import match_email, strip_whitespace, check_for_empty_fields
 
 
 class UserListResource(Resource):
@@ -30,10 +30,10 @@ class UserListResource(Resource):
             'email', type=str, required=True, help='Please enter email', location='json'
         )
         self.reqparse.add_argument(
-            'car_registration', type=str, default='', location='json'
+            'car_registration', type=str, default=None, location='json'
         )
         self.reqparse.add_argument(
-            'phone_number', type=str, default='', location='json'
+            'phone_number', type=str, default=None, location='json'
         )
         self.reqparse.add_argument(
             'password', type=str, required=True, help='Please enter password', location='json'
@@ -54,6 +54,8 @@ class UserListResource(Resource):
         ---
         tags:
           - User
+        security:
+          - Bearer: []  
         parameters:
           - name: body
             in: body
@@ -92,6 +94,7 @@ class UserListResource(Resource):
         """
   
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         self.abort_if_email_is_already_used(args['email'])
         if match_email(args['email']):
             if args['password'] == args['confirm_password']:
@@ -173,6 +176,8 @@ class LoginResource(Resource):
         ---
         tags:
           - User
+        security:
+          - Bearer: []  
         parameters:
           - name: body
             in: body
@@ -200,6 +205,7 @@ class LoginResource(Resource):
               $ref: '#/definitions/Login'
               """
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         try:
             self.cursor.execute('SELECT * FROM app_user WHERE email = %s ;',
                                 ([args['email']]))
@@ -257,6 +263,8 @@ class UserResource(Resource):
         ---
         tags:
           - User
+        security:
+          - Bearer: []  
         parameters:
           - name: user_id
             in: path
@@ -287,6 +295,8 @@ class UserResource(Resource):
         ---
         tags:
           - User
+        security:
+          - Bearer: []  
         parameters:
           - name: user_id
             in: path
@@ -310,6 +320,8 @@ class UserResource(Resource):
         ---
         tags:
           - User
+        security:
+          - Bearer: []  
         parameters:
           - name: user_id
             in: path
@@ -350,6 +362,7 @@ class UserResource(Resource):
               $ref: '#/definitions/UserUpdate'
         """
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         self.abort_if_user_doesnt_exist(user_id)
         if len(args['password']) >= 8:
             try:
@@ -410,16 +423,13 @@ api = Api(users_bp)
 
 api.add_resource(
     UserListResource,
-    '/api/v2/auth/signup',
-    '/api/v2/auth/signup/'
+    '/api/v2/auth/signup'
 )
 api.add_resource(
     LoginResource,
-    '/api/v2/auth/login',
     '/api/v2/auth/login'
 )
 api.add_resource(
     UserResource,
-    '/api/v2/users/<user_id>',
     '/api/v2/users/<user_id>'
 )

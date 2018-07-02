@@ -16,10 +16,17 @@ def create_app():
     app = Flask(__name__)
     app.config['SWAGGER'] = {
         'title': 'Ride My Way',
-        'uiversion': 3
+        'uiversion': 3,
+        "securityDefinitions": {
+            "Bearer": {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header",
+            }
+        },
     }
+    app.url_map.strict_slashes = False
     app.config['JWT_SECRET_KEY'] = 'my_secret_key'
-    # app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 
     Swagger(app)
     JWTManager(app)
