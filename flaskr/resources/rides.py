@@ -7,7 +7,8 @@ from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 from flask_jwt_extended import jwt_required
 
-from flaskr.db import connectDB
+from flaskr.models.ride import Ride
+
 
 
 class RideListResource(Resource):
@@ -43,10 +44,7 @@ class RideListResource(Resource):
         self.reqparse.add_argument(
             'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location='json'
         )
-
-        self.connection = connectDB()
-        self.cursor = self.connection.cursor(
-            cursor_factory=psycopg2.extras.DictCursor)
+        self.ride = Ride()
         super(RideListResource, self).__init__()
 
     # GET method for ride list
@@ -63,18 +61,9 @@ class RideListResource(Resource):
           204:
             description: There are no rides offers yet'
         """
-        try:
-            self.cursor.execute('SELECT * FROM ride;')
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        ride_list = self.cursor.fetchall()
-        if len(ride_list) == 0:
-            return {'status': 'success', 'message': 'There are no rides offers yet'}, 204
-        else:
-            return {'status': 'success', 'message': 'Fetch successful', 'data': ride_list}
+        return self.ride.browse()
 
-        # POST method for new ride request
+    # POST method for new ride request
     @jwt_required
     def post(self):
         """
@@ -137,22 +126,7 @@ class RideListResource(Resource):
               $ref: '#/definitions/Ride'
         """
         args = self.reqparse.parse_args()
-        try:
-            self.cursor.execute(
-                """INSERT INTO ride (
-                    date,
-                    time,
-                    pickup, 
-                    dropoff,
-                    capacity,
-                    seats_available,
-                    driver_id,
-                    registration,
-                    price,
-                    status
-                    ) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
-                (
+        return self.ride.add(
                     args['date'], 
                     args['time'], 
                     args['pickup'], 
@@ -164,12 +138,6 @@ class RideListResource(Resource):
                     args['price'], 
                     args['status']
                 )
-            )
-            self.connection.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'message': error}, 500
-        return {'status': 'success', 'message': 'Ride creation successful'}, 201
 
 
 class RideResource(Resource):
@@ -206,9 +174,7 @@ class RideResource(Resource):
             'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location='json'
         )
 
-        self.connection = connectDB()
-        self.cursor = self.connection.cursor(
-            cursor_factory=psycopg2.extras.DictCursor)
+        self.ride = Ride()
         super(RideResource, self).__init__()
 
 
@@ -275,23 +241,9 @@ class RideResource(Resource):
             schema:
               $ref: '#/definitions/Ride'
         """
-        self.abort_if_ride_doesnt_exist(ride_id)
+        self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
         args = self.reqparse.parse_args()
-        try:
-            self.cursor.execute(
-                """UPDATE ride SET 
-                    date = %s,
-                    time = %s,
-                    pickup = %s,
-                    dropoff = %s,
-                    capacity = %s,
-                    seats_available = %s,
-                    driver_id = %s,
-                    registration = %s,
-                    price = %s,
-                    status = %s
-                 WHERE id = %s;""",
-                (
+        return self.ride.edit(
                     args['date'], 
                     args['time'], 
                     args['pickup'], 
@@ -304,16 +256,8 @@ class RideResource(Resource):
                     args['status'], 
                     ride_id
                 )
-            )
-            self.connection.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
-        return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
-
         
     # GET method for a ride request
-
     @jwt_required
     def get(self, ride_id):
         """
@@ -331,7 +275,7 @@ class RideResource(Resource):
           404:
             description: There ride offer does not exist
         """
-        request = self.abort_if_ride_doesnt_exist(ride_id)
+        request = self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
         return {'status':'success', 'message': 'Fetch successful', 'data': request}
 
 
@@ -354,38 +298,8 @@ class RideResource(Resource):
           404:
             description: The ride offer does not exist
         """
-        self.abort_if_ride_doesnt_exist(ride_id)
-        try:
-            self.cursor.execute('DELETE FROM ride WHERE id = %s ;',
-                                ([ride_id]))
-            self.connection.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
-        self.delete_this_rides_requests(ride_id)
-        return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
-
-    def delete_this_rides_requests(self, ride_id):
-        try:
-            self.cursor.execute('DELETE FROM ride_request WHERE ride_id = %s ;',
-                                ([ride_id]))
-            self.connection.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
-        return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
-
-    def abort_if_ride_doesnt_exist(self, ride_id):
-            try:
-                self.cursor.execute('SELECT * FROM ride WHERE id = %s ;',
-                                    ([ride_id]))
-            except (Exception, psycopg2.DatabaseError) as error:
-                self.connection.rollback()
-                return {'status': 'failed', 'data': error}, 500
-            results = self.cursor.fetchone()
-            if results is None:
-                abort(404, message='The ride with id {} does not exist'.format(ride_id))
-            return results
+        self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
+        return self.ride.delete(ride_id)
 
 rides_bp = Blueprint('resources.rides', __name__)
 api = Api(rides_bp)
