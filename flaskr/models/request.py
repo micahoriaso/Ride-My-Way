@@ -22,7 +22,7 @@ class RideRequest:
             return {'status': 'failed', 'data': error}, 500
         ride_offer_request = self.cursor.fetchall()
         if len(ride_offer_request) == 0:
-            return {'status': 'success', 'message': 'No requests available for this ride yet'}
+            return {'status': 'success', 'message': 'No requests available for this ride yet'}, 202
         else:
             return {'status': 'success', 'message': 'Fetch successful', 'data': ride_offer_request}
 
@@ -50,7 +50,7 @@ class RideRequest:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
 
         return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
 
@@ -75,7 +75,7 @@ class RideRequest:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
 
         return {'status': 'success', 'message': 'Ride request successfully deleted'}, 200
 

@@ -6,6 +6,9 @@ from flask_jwt_extended import jwt_required
 
 from flaskr.models.car import Car
 
+from flaskr.resources.helpers import check_for_empty_fields
+
+
 
 class CarListResource(Resource):
     def __init__(self):
@@ -30,10 +33,14 @@ class CarListResource(Resource):
         ---
         tags:
           - Car
+        security:
+          - Bearer: []  
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
-          204:
+          202:
             description: There are no cars here'
         """
         return self.car.browse()
@@ -46,6 +53,8 @@ class CarListResource(Resource):
         ---
         tags:
           - Car
+        security:
+          - Bearer: []  
         parameters:
           - name: body
             in: body
@@ -67,12 +76,15 @@ class CarListResource(Resource):
                   type: integer
                   description: The capacity of the car.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Car created successfully
             schema:
               $ref: '#/definitions/Car'
         """
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         self.car.abort_if_car_registration_is_already_used(
             args['registration'])
         return self.car.add(args['registration'],
@@ -101,6 +113,8 @@ class CarResource(Resource):
         ---
         tags:
           - Car
+        security:
+          - Bearer: []  
         parameters:
           - name: registration
             in: path
@@ -121,6 +135,8 @@ class CarResource(Resource):
                   type: integer
                   description: The car's capacity.
         responses:
+          500:
+            description: Internal server error
           200:
             description: Car updated successful
             schema:
@@ -128,6 +144,7 @@ class CarResource(Resource):
         """
         self.car.abort_if_car_doesnt_exist(registration)
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         return self.car.edit(registration, args['model'], args['capacity'])
 
         
@@ -140,11 +157,15 @@ class CarResource(Resource):
         ---
         tags:
           - Car
+        security:
+          - Bearer: []  
         parameters:
           - name: registration
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
           404:
@@ -163,11 +184,15 @@ class CarResource(Resource):
         ---
         tags:
           - Car
+        security:
+          - Bearer: []  
         parameters:
           - name: registration
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Car successfully deleted
           404:
@@ -180,11 +205,9 @@ cars_bp = Blueprint('resources.car', __name__)
 api = Api(cars_bp)
 api.add_resource(
     CarResource,
-    '/api/v2/cars/<registration>',
-    '/api/v2/cars/<registration>/'
+    '/api/v2/cars/<registration>'
 )
 api.add_resource(
     CarListResource,
-    '/api/v2/cars',
-    '/api/v2/cars/',
+    '/api/v2/cars'
     )

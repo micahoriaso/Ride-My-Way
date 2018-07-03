@@ -9,6 +9,8 @@ from flask_jwt_extended import jwt_required
 
 from flaskr.models.request import RideRequest
 
+from flaskr.resources.helpers import check_for_empty_fields
+
 
 
 
@@ -35,14 +37,18 @@ class RequestListResource(Resource):
         ---
         tags:
           - Ride request
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
-          404:
+          202:
             description: No requests made for this ride yet'
         """
         self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
@@ -56,6 +62,8 @@ class RequestListResource(Resource):
         ---
         tags:
           - Ride request
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
@@ -78,12 +86,15 @@ class RequestListResource(Resource):
                 #   type: string
                 #   description: Unique identifier of the ride offer.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Ride successfully requested
             schema:
               $ref: '#/definitions/RideRequest'
         """
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
         return self.ride_request.add(ride_id, args['requestor_id'], args['request_status'])
 
@@ -104,6 +115,8 @@ class RequestResource(Resource):
         ---
         tags:
           - Ride request
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
@@ -112,6 +125,8 @@ class RequestResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Ride request successfully deleted
           404:
@@ -129,6 +144,8 @@ class RequestResource(Resource):
         ---
         tags:
           - Ride request
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
@@ -137,6 +154,8 @@ class RequestResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
           404:
@@ -155,6 +174,8 @@ class RequestResource(Resource):
         ---
         tags:
           - Ride request
+        security:
+          - Bearer: []  
         parameters:
           - name: ride_id
             in: path
@@ -178,6 +199,8 @@ class RequestResource(Resource):
                     - "Accepted"
                     - "Declined"
         responses:
+          500:
+            description: Internal server error
           201:
             description: Ride request successfully updated
             schema:
@@ -185,6 +208,7 @@ class RequestResource(Resource):
         """
         self.ride_request.abort_if_ride_request_doesnt_exist(request_id)
         args = self.reqparse.parse_args()
+        check_for_empty_fields(args)
         return self.ride_request.edit(request_id, args['request_status'])
 
 
@@ -192,11 +216,9 @@ requests_bp = Blueprint('resources.requests', __name__)
 api = Api(requests_bp)
 api.add_resource(
     RequestResource, 
-    '/api/v2/rides/<ride_id>/requests/<request_id>',
-    '/api/v2/rides/<ride_id>/requests/<request_id>/'
+    '/api/v2/rides/<ride_id>/requests/<request_id>'
 )
 api.add_resource(
     RequestListResource, 
-    '/api/v2/rides/<ride_id>/requests',
-    '/api/v2/rides/<ride_id>/requests/',
+    '/api/v2/rides/<ride_id>/requests'
     )
