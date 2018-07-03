@@ -10,6 +10,7 @@ click==6.7
 coverage==4.0.3
 flasgger==0.9.0
 Flask==1.0.2
+Flask-JWT-Extended==3.10.0
 Flask-Migrate==2.2.1
 Flask-RESTful==0.3.6
 Flask-SQLAlchemy==2.3.2

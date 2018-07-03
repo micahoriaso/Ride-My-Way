@@ -45,6 +45,7 @@ def create_db_tables():
             lastname VARCHAR(140) NOT NULL, 
             fullname VARCHAR(140) NOT NULL, 
             email VARCHAR(140) NOT NULL, 
+            phone_number VARCHAR(140), 
             password VARCHAR(140) NOT NULL, 
             car_registration VARCHAR(140)
             );
