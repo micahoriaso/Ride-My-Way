@@ -85,6 +85,8 @@ class UserListResource(Resource):
                   type: string
                   description: Confirmation of the password entered.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Account creation successful
           202:
@@ -195,6 +197,8 @@ class LoginResource(Resource):
                   type: string
                   description: The user's password.
         responses:
+          500:
+            description: Internal server error
           200:
             description: Login successful
           202:
@@ -270,6 +274,8 @@ class UserResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: User successfully deleted
           404:
@@ -302,6 +308,8 @@ class UserResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
           404:
@@ -354,6 +362,8 @@ class UserResource(Resource):
                   type: string
                   description: The user's phone number.
         responses:
+          500:
+            description: Internal server error
           200:
             description: Update successful
           404:

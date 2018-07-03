@@ -21,7 +21,7 @@ class Car:
             return {'status': 'failed', 'data': error}, 500
         car_list = self.cursor.fetchall()
         if len(car_list) == 0:
-            return {'status': 'success', 'message': 'There are no cars here'}, 204
+            return {'status': 'success', 'message': 'There are no cars here'}, 202
         else:
             return {'status': 'success', 'message': 'Fetch successful', 'data': car_list}, 200
 
@@ -58,7 +58,7 @@ class Car:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
         return {'status': 'success', 'data': 'Car successfully updated'}, 200
 
     # method for creating a new car
@@ -82,7 +82,7 @@ class Car:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
         return {'status': 'success', 'data': 'Car successfully deleted'}, 200
 
     def abort_if_car_registration_is_already_used(self, registration):

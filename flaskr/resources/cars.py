@@ -36,9 +36,11 @@ class CarListResource(Resource):
         security:
           - Bearer: []  
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
-          204:
+          202:
             description: There are no cars here'
         """
         return self.car.browse()
@@ -74,6 +76,8 @@ class CarListResource(Resource):
                   type: integer
                   description: The capacity of the car.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Car created successfully
             schema:
@@ -131,6 +135,8 @@ class CarResource(Resource):
                   type: integer
                   description: The car's capacity.
         responses:
+          500:
+            description: Internal server error
           200:
             description: Car updated successful
             schema:
@@ -158,6 +164,8 @@ class CarResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
           404:
@@ -183,6 +191,8 @@ class CarResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Car successfully deleted
           404:

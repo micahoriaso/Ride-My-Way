@@ -21,9 +21,9 @@ class Ride:
             return {'status': 'failed', 'data': error}, 500
         ride_list = self.cursor.fetchall()
         if len(ride_list) == 0:
-            return {'status': 'success', 'message': 'There are no rides offers yet'}, 204
+            return {'status': 'success', 'message': 'There are no rides offers yet'}, 202
         else:
-            return {'status': 'success', 'message': 'Fetch successful', 'data': ride_list}
+            return {'status': 'success', 'message': 'Fetch successful', 'data': ride_list}, 200
 
     # method returns the details of a ride
     def read(self, request_id):
@@ -73,7 +73,7 @@ class Ride:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
         return {'status': 'success', 'data': 'Ride offer successfully updated'}, 200
 
     # method for creating a new ride request
@@ -120,7 +120,7 @@ class Ride:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
         self.delete_this_rides_requests(ride_id)
         return {'status': 'success', 'data': 'Ride request successfully deleted'}, 200
 
@@ -131,7 +131,7 @@ class Ride:
             self.connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 200
+            return {'status': 'failed', 'data': error}, 500
         return {'status': 'success', 'data': 'Ride requests successfully deleted'}, 200
 
     def abort_if_ride_offer_doesnt_exist(self, ride_id):

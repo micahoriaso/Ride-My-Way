@@ -59,9 +59,11 @@ class RideListResource(Resource):
         security:
           - Bearer: []  
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
-          204:
+          202:
             description: There are no rides offers yet'
         """
         return self.ride.browse()
@@ -125,6 +127,8 @@ class RideListResource(Resource):
                   type: string
                   description: The status of the ride.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Ride creation successful
             schema:
@@ -247,6 +251,8 @@ class RideResource(Resource):
                   type: string
                   description: The status of the ride.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Ride creation successful
             schema:
@@ -284,6 +290,8 @@ class RideResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
           404:
@@ -309,6 +317,8 @@ class RideResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Ride successfully deleted
           404:

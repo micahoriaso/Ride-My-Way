@@ -16,3 +16,10 @@ def check_for_empty_fields(args):
     for k, v in args.items():
         if v == "":
             abort(500, message='Please fill in the field {}'.format(k))
+
+def check_if_integer(args):
+    try:
+        args = int(args)
+    except ValueError:
+        # it was a string, not an int.
+        abort(500, message='{} should be a number'.format(args))

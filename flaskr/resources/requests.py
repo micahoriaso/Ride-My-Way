@@ -44,9 +44,11 @@ class RequestListResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
-          404:
+          202:
             description: No requests made for this ride yet'
         """
         self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
@@ -84,6 +86,8 @@ class RequestListResource(Resource):
                 #   type: string
                 #   description: Unique identifier of the ride offer.
         responses:
+          500:
+            description: Internal server error
           201:
             description: Ride successfully requested
             schema:
@@ -121,6 +125,8 @@ class RequestResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Ride request successfully deleted
           404:
@@ -148,6 +154,8 @@ class RequestResource(Resource):
             in: path
             required: true
         responses:
+          500:
+            description: Internal server error
           200:
             description: Fetch successfull
           404:
@@ -191,6 +199,8 @@ class RequestResource(Resource):
                     - "Accepted"
                     - "Declined"
         responses:
+          500:
+            description: Internal server error
           201:
             description: Ride request successfully updated
             schema:
