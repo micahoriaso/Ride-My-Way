@@ -63,7 +63,7 @@ class RideListResource(Resource):
             description: Internal server error
           200:
             description: Fetch successfull
-          202:
+          404:
             description: There are no rides offers yet'
         """
         return self.ride.browse()

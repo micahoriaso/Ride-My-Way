@@ -8,8 +8,7 @@ from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from flask_jwt_extended import (create_access_token, 
-create_refresh_token, jwt_required, jwt_refresh_token_required,
+from flask_jwt_extended import (create_access_token, jwt_required,
 get_jwt_identity, get_raw_jwt)
 
 from flaskr.db import connectDB
@@ -133,12 +132,10 @@ class UserListResource(Resource):
                         self.connection.rollback()
                         return {'status': 'failed', 'message': error}, 500
                     access_token = create_access_token(identity= args['email'])
-                    refresh_token = create_refresh_token(identity= args['email'])
                     return {
                         'status': 'success', 
                         'message': 'Account creation successful',
                         'access_token': access_token,
-                        'refresh_token': refresh_token
                         }, 201
                 return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
             return {'status': 'failed', 'message': 'Password and confirm password do not match, try again'}, 202
@@ -221,13 +218,10 @@ class LoginResource(Resource):
             if results['email'] == args['email'] and check_password_hash(results['password'], args['password']):
                 access_token = create_access_token(
                     identity=args['email'])
-                refresh_token = create_refresh_token(
-                    identity= args['email'])
                 return {
                     'status': 'success', 
                     'message': 'Login successful',
                     'access_token': access_token,
-                    'refresh_token': refresh_token
                 }, 200
             return {'status': 'failed', 'message': 'Invalid email/password combination'}, 202
         else:
@@ -419,13 +413,6 @@ class UserResource(Resource):
             abort(404, message='The user with id {} does not exist'.format(user_id))
         return results
 
-
-class TokenRefresh(Resource):
-    @jwt_refresh_token_required
-    def post(self):
-        current_user = get_jwt_identity()
-        access_token = create_access_token(identity=current_user)
-        return {'access_token': access_token}
 
 
 users_bp = Blueprint('resources.users', __name__)

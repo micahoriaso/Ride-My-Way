@@ -14,9 +14,10 @@ def strip_whitespace(string):
 
 def check_for_empty_fields(args):
     for k, v in args.items():
-        v =strip_whitespace(v)
-        if v == "":
-            abort(500, message='Please fill in the field {}'.format(k))
+        if isinstance(v, str):
+            v =strip_whitespace(v)
+            if v == "":
+                abort(500, message='Please fill in the field {}'.format(k))
 
 def check_if_integer(args):
     try:

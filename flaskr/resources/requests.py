@@ -48,7 +48,7 @@ class RequestListResource(Resource):
             description: Internal server error
           200:
             description: Fetch successfull
-          202:
+          404:
             description: No requests made for this ride yet'
         """
         self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)

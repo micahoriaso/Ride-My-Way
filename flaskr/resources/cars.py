@@ -40,7 +40,7 @@ class CarListResource(Resource):
             description: Internal server error
           200:
             description: Fetch successfull
-          202:
+          404:
             description: There are no cars here'
         """
         return self.car.browse()
