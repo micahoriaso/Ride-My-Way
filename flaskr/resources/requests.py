@@ -21,12 +21,11 @@ class RequestListResource(Resource):
             'requestor_id', type=int, required=True, help='Please enter requestor', location='json'
         )
         self.reqparse.add_argument(
-            'request_status', type=str, location='json', default='Pending'
+            'request_status', type=str, location='json', default='Requested'
         )
         self.reqparse.add_argument(
             'ride_id', type=int, location='json'
         )
-        self.ride_request = RideRequest()
         super(RequestListResource, self).__init__()
 
     # GET method for ride requests list
@@ -51,8 +50,7 @@ class RequestListResource(Resource):
           404:
             description: No requests made for this ride yet'
         """
-        self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
-        return self.ride_request.browse(ride_id)
+        return RideRequest.browse(ride_id)
 
     # POST method for new ride request
     @jwt_required
@@ -95,8 +93,9 @@ class RequestListResource(Resource):
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
-        return self.ride_request.add(ride_id, args['requestor_id'], args['request_status'])
+        ride_request = RideRequest(
+            ride_id, args['requestor_id'], args['request_status'])
+        return ride_request.add()
 
 class RequestResource(Resource):
     def __init__(self):
@@ -104,7 +103,6 @@ class RequestResource(Resource):
         self.reqparse.add_argument(
             'request_status', type=str, location='json', default='Pending'
         )
-        self.ride_request = RideRequest()
         super(RequestResource, self).__init__()
 
     # DELETE method for deleting a ride request
@@ -132,9 +130,7 @@ class RequestResource(Resource):
           404:
             description: The ride request does not exist
         """
-        self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
-        self.ride_request.abort_if_ride_request_doesnt_exist(request_id)
-        return self.ride_request.delete(request_id)
+        return RideRequest.delete(ride_id, request_id)
 
     # GET method for a ride request
     @jwt_required
@@ -161,8 +157,7 @@ class RequestResource(Resource):
           404:
             description: There ride offer or request does not exist
         """
-        self.ride_request.abort_if_ride_offer_doesnt_exist(ride_id)
-        request = self.ride_request.read(request_id)
+        request = RideRequest.read(ride_id, request_id)
         return {'status': 'success', 'message': 'Fetch successful', 'data': request}
       
     
@@ -206,10 +201,9 @@ class RequestResource(Resource):
             schema:
               $ref: '#/definitions/UpdateRideRequest'
         """
-        self.ride_request.abort_if_ride_request_doesnt_exist(request_id)
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return self.ride_request.edit(request_id, args['request_status'])
+        return RideRequest.edit(ride_id, request_id, args['request_status'])
 
 
 requests_bp = Blueprint('resources.requests', __name__)
