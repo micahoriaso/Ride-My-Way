@@ -38,7 +38,17 @@ class User:
         connection.close()
         if results is None:
             abort(404, message='The user with id {} does not exist'.format(user_id))
-        return results
+        user = {
+            'id': results['id'],
+            'firstname': results['firstname'],
+            'lastname': results['lastname'],
+            'fullname': results['fullname'],
+            'email': results['email'],
+            'phone_number': results['phone_number'],
+            'password': results['password'],
+            'car_registration': results['car_registration']
+        }
+        return user
 
     # method for updating a user
     @staticmethod
@@ -46,6 +56,7 @@ class User:
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         User.abort_if_user_doesnt_exist(user_id)
+        User.abort_if_car_doesnt_exist(car_registration)
         try:
             cursor.execute(
                 """UPDATE app_user SET
@@ -186,3 +197,22 @@ class User:
         if results is not None:
             abort(400, message='The email {} is already taken'.format(email))
         return results
+
+    @staticmethod
+    def abort_if_car_doesnt_exist(registration):
+        if registration is not None:
+            connection = connectDB()
+            cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            try:
+                cursor.execute('SELECT * FROM car WHERE id = %s ;',
+                            ([registration]))
+            except (Exception, psycopg2.DatabaseError) as error:
+                connection.rollback()
+                return {'status': 'failed', 'data': error}, 500
+            results = cursor.fetchone()
+            cursor.close()
+            connection.close()
+            if results is None:
+                abort(400, message='The car with licence plate {} cannot be found in our records'.format(
+                    registration))
+            return results

@@ -45,7 +45,6 @@ class RideListResource(Resource):
         self.reqparse.add_argument(
             'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location='json'
         )
-        self.ride = Ride()
         super(RideListResource, self).__init__()
 
     # GET method for ride list
@@ -66,7 +65,7 @@ class RideListResource(Resource):
           404:
             description: There are no rides offers yet'
         """
-        return self.ride.browse()
+        return Ride.browse()
 
     # POST method for new ride request
     @jwt_required
@@ -111,15 +110,9 @@ class RideListResource(Resource):
                 capacity:
                   type: string
                   description: The car's passenger capacity.
-                seats_available:
-                  type: string
-                  description: The seats that are still on offer.
                 driver_id:
                   type: string
                   description: Unique identifier of the driver.
-                registration:
-                  type: string
-                  description: The car's licence plate.
                 price:
                   type: string
                   description: The price of the ride.
@@ -136,18 +129,17 @@ class RideListResource(Resource):
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return self.ride.add(
-                    args['date'], 
-                    args['time'], 
-                    args['pickup'], 
-                    args['dropoff'], 
-                    args['capacity'], 
-                    args['available_seats'], 
-                    args['driver_id'], 
-                    args['registration'], 
-                    args['price'], 
-                    args['status']
-                )
+        ride = Ride(
+            args['date'],
+            args['time'],
+            args['pickup'],
+            args['dropoff'],
+            args['capacity'],
+            args['driver_id'],
+            args['price'],
+            args['status']
+        )
+        return ride.add()
 
 
 class RideResource(Resource):
@@ -184,7 +176,6 @@ class RideResource(Resource):
             'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location='json'
         )
 
-        self.ride = Ride()
         super(RideResource, self).__init__()
 
 
@@ -258,18 +249,15 @@ class RideResource(Resource):
             schema:
               $ref: '#/definitions/Ride'
         """
-        self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return self.ride.edit(
+        return Ride.edit(
                     args['date'], 
                     args['time'], 
                     args['pickup'], 
                     args['dropoff'], 
                     args['capacity'], 
-                    args['available_seats'], 
                     args['driver_id'], 
-                    args['registration'], 
                     args['price'], 
                     args['status'], 
                     ride_id
@@ -297,12 +285,11 @@ class RideResource(Resource):
           404:
             description: There ride offer does not exist
         """
-        request = self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
+        request = Ride.read(ride_id)
         return {'status':'success', 'message': 'Fetch successful', 'data': request}
 
 
     # DELETE method for deleting a ride request
-
     @jwt_required
     def delete(self, ride_id):
         """
@@ -324,8 +311,7 @@ class RideResource(Resource):
           404:
             description: The ride offer does not exist
         """
-        self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
-        return self.ride.delete(ride_id)
+        return Ride.delete(ride_id)
 
 rides_bp = Blueprint('resources.rides', __name__)
 api = Api(rides_bp)

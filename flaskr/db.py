@@ -25,7 +25,6 @@ def create_db_tables():
             capacity INT NOT NULL, 
             seats_available INT NOT NULL, 
             driver_id INT NOT NULL, 
-            registration VARCHAR(140) NOT NULL, 
             price REAL NOT NULL, 
             status VARCHAR(140) NOT NULL
             );

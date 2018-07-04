@@ -16,25 +16,25 @@ class UserListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'firstname', type=str, required=True, help='Please enter firstname', location='json'
+            'firstname', type=str, required=True, help='Please enter firstname', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'lastname', type=str, required=True, help='Please enter lastname', location='json'
+            'lastname', type=str, required=True, help='Please enter lastname', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'email', type=str, required=True, help='Please enter email', location='json'
+            'email', type=str, required=True, help='Please enter email', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'car_registration', type=str, default=None, location='json'
+            'car_registration', type=str, default=None, location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'phone_number', type=str, default=None, location='json'
+            'phone_number', type=str, default=None, location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, required=True, help='Please enter password', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'confirm_password', type=str, required=True, help='Please enter the confirm password', location='json'
+            'confirm_password', type=str, required=True, help='Please enter the confirm password', location=['form', 'json']
         )
         
 
@@ -47,36 +47,34 @@ class UserListResource(Resource):
         ---
         tags:
           - User
-        security:
-          - Bearer: []  
         parameters:
-          - name: body
-            in: body
+          - name: firstname
+            in: formData
             required: true
-            schema:
-              id: User
-              required:
-                - firstname
-                - lastname
-                - email
-                - password
-                - confirm_password
-              properties:
-                firstname:
-                  type: string
-                  description: The user's firstname.
-                lastname:
-                  type: string
-                  description: The user's lastname.
-                email:
-                  type: string
-                  description: The user's email.
-                password:
-                  type: string
-                  description: The user's password.
-                confirm_password:
-                  type: string
-                  description: Confirmation of the password entered.
+            description: The user's firstname.
+            type: string
+          - name: lastname
+            in: formData
+            required: true
+            description: The user's lastname.
+            type: string
+          - name: email
+            in: formData
+            required: true
+            description: The user's email.
+            type: string
+          - name: password
+            in: formData
+            required: true
+            description: The user's password.
+            type: string
+            format: password
+          - name: confirm_password
+            in: formData
+            required: true
+            description: Confirmation of the password entered.
+            type: string
+            format: password
         responses:
           500:
             description: Internal server error
@@ -84,8 +82,6 @@ class UserListResource(Resource):
             description: Account creation successful
           202:
             description: Password is too short. At least 8 characters required
-            schema:
-              $ref: '#/definitions/User'
         """
   
         args = self.reqparse.parse_args()
@@ -106,15 +102,16 @@ class LoginResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'email', type=str, required=True, help='Please enter email', location='json'
+            'email', type=str, required=True, help='Please enter email', location=['form','json']
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, required=True, help='Please enter password', location=['form','json']
         )
         
 
         super(LoginResource, self).__init__()
 
+    # Method for loggin in a user
     def post(self):
         """
         Endpoint for user log in
@@ -124,33 +121,27 @@ class LoginResource(Resource):
         security:
           - Bearer: []  
         parameters:
-          - name: body
-            in: body
+          - name: email
+            in: formData
             required: true
-            schema:
-              id: Login
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  description: The user's email.
-                password:
-                  type: string
-                  description: The user's password.
+            description: The user's email.
+            type: string
+          - name: password
+            in: formData
+            required: true
+            description: The user's password.
+            type: string
+            format: password
         responses:
           500:
             description: Internal server error
           200:
             description: Login successful
           202:
-            description: Invalid email/password combination
+            description: Wrong password, please try again.
           404:
             description: The user with email string does not exist
-            schema:
-              $ref: '#/definitions/Login'
-              """
+        """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
         return User.login(args['email'], args['password'])
@@ -160,19 +151,19 @@ class UserResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'firstname', type=str, required=True, help='Please enter firstname', location='json'
+            'firstname', type=str, required=True, help='Please enter firstname', location=['form','json']
         )
         self.reqparse.add_argument(
-            'lastname', type=str, required=True, help='Please enter lastname', location='json'
+            'lastname', type=str, required=True, help='Please enter lastname', location=['form','json']
         )
         self.reqparse.add_argument(
-            'car_registration', location='json'
+            'car_registration', location=['form','json']
         )
         self.reqparse.add_argument(
-            'phone_number', location='json'
+            'phone_number', location=['form','json']
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, required=True, help='Please enter password', location=['form','json']
         )
 
         
@@ -192,6 +183,7 @@ class UserResource(Resource):
           - name: user_id
             in: path
             required: true
+            type: integer
         responses:
           500:
             description: Internal server error
@@ -199,8 +191,6 @@ class UserResource(Resource):
             description: User successfully deleted
           404:
             description: The user does not exist
-            schema:
-              $ref: '#/definitions/UserUpdate'
         """
         return User.delete(user_id)
 
@@ -218,6 +208,7 @@ class UserResource(Resource):
           - name: user_id
             in: path
             required: true
+            type: integer
         responses:
           500:
             description: Internal server error
@@ -225,8 +216,6 @@ class UserResource(Resource):
             description: Fetch successfull
           404:
             description: The user does not exist
-            schema:
-              $ref: '#/definitions/UserUpdate'
         """
         return User.read(user_id)
 
@@ -239,38 +228,36 @@ class UserResource(Resource):
         tags:
           - User
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: user_id
             in: path
             required: true
-          - name: body
-            in: body
+            type: integer
+          - name: firstname
+            in: formData
             required: true
-            schema:
-              id: UserUpdate
-              required:
-                - firstname
-                - lastname
-                - password
-                - car_registration
-                - phone_number
-              properties:
-                firstname:
-                  type: string
-                  description: The user's firstname.
-                lastname:
-                  type: string
-                  description: The user's lastname.
-                password:
-                  type: string
-                  description: The user's password.
-                car_registration:
-                  type: string
-                  description: The user's car licence plate.
-                phone_number:
-                  type: string
-                  description: The user's phone number.
+            description: The user's firstname.
+            type: string
+          - name: lastname
+            in: formData
+            required: true
+            description: The user's lastname.
+            type: string
+          - name: password
+            in: formData
+            required: true
+            description: The user's password.
+            type: string
+            format: password
+          - name: car_registration
+            in: formData
+            description: The user's car licence plate.
+            type: string
+          - name: phone_number
+            in: formData
+            description: The user's phone number.
+            type: string
         responses:
           500:
             description: Internal server error
@@ -278,8 +265,6 @@ class UserResource(Resource):
             description: Update successful
           404:
             description: The user does not exist
-            schema:
-              $ref: '#/definitions/UserUpdate'
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)

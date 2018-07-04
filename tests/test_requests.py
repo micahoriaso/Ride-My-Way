@@ -77,17 +77,17 @@ def test_delete_existing_ride_offer_request(client, test_case_data, auth_header)
         )
     assert response.status_code == 200
 
-# def test_delete_nonexistent_ride_offer_request(client, auth_header):
-#     response = client.delete(
-#         '/api/v2/rides/1/requests/2', 
-#         headers=auth_header
-#         )
-#     assert response.status_code == 404
+def test_delete_nonexistent_ride_offer_request(client, auth_header):
+    response = client.delete(
+        '/api/v2/rides/1/requests/2', 
+        headers=auth_header
+        )
+    assert response.status_code == 404
 
 
-# def test_delete_request_from_nonexistent_ride_offer(client, auth_header):
-#     response = client.delete(
-#         '/api/v2/rides/2/requests/1', 
-#         headers=auth_header
-#         )
-#     assert response.status_code == 404
+def test_delete_request_from_nonexistent_ride_offer(client, auth_header):
+    response = client.delete(
+        '/api/v2/rides/2/requests/1', 
+        headers=auth_header
+        )
+    assert response.status_code == 404
