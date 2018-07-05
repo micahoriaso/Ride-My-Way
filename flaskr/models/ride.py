@@ -5,15 +5,20 @@ from flask_restful import abort
 
 from flaskr.db import connectDB
 
+from flaskr.models.user import User
+
 
 class Ride:
-    def __init__(self, date, time, pickup, dropoff, capacity, driver_id, price, status):
+    def __init__(self, date, time, pickup, dropoff, driver_id, price, status='In Offer'):
+        car = User.get_car(driver_id)
+        car_capacity = car['capacity']
+
         self.date = date
         self.time = time
         self.pickup = pickup
         self.dropoff = dropoff
-        self.capacity = capacity
-        self.seats_available = capacity
+        self.capacity = car_capacity
+        self.seats_available = car_capacity
         self.driver_id = driver_id
         self.price = price
         self.status = status
@@ -34,9 +39,24 @@ class Ride:
         cursor.close()
         connection.close()
         if len(ride_list) == 0:
-            return {'status': 'success', 'message': 'There are no rides offers yet'}, 202
+            return {'status': 'success', 'message': 'There are no rides offers yet'}, 404
         else:
-            return {'status': 'success', 'message': 'Fetch successful', 'data': ride_list}, 200
+            data = []
+            for ride in ride_list:
+                item = {
+                    'id': ride['id'],
+                    'time': ride['time'],
+                    'date': ride['date'],
+                    'pickup': ride['pickup'],
+                    'dropoff': ride['dropoff'],
+                    'capacity': ride['capacity'],
+                    'seats_available': ride['seats_available'],
+                    'driver_id': ride['driver_id'],
+                    'price': ride['price'],
+                    'status': ride['status']
+                }
+                data.append(item)
+            return {'status': 'success', 'message': 'Fetch successful', 'data': data}, 200
 
     # method returns the details of a ride
     @staticmethod
@@ -55,13 +75,28 @@ class Ride:
         connection.close()
         if results is None:
             abort(
-                404, message='The ride request with id {} does not exist'.format(ride_id)
+                404, message='The ride with id {} does not exist'.format(ride_id)
                 )
-        return results
+        ride = {
+            'id': results['id'],
+            'time': results['time'],
+            'date': results['date'],
+            'pickup': results['pickup'],
+            'dropoff': results['dropoff'],
+            'capacity': results['capacity'],
+            'seats_available': results['seats_available'],
+            'driver_id': results['driver_id'],
+            'price': results['price'],
+            'status': results['status']
+        }
+        return ride
 
     # method for updating a ride
     @staticmethod
-    def edit(date, time, pickup, dropoff, capacity, driver_id, price, status, ride_id):
+    def edit(date, time, pickup, dropoff, driver_id, price, status, ride_id):
+        car = User.get_car(driver_id)
+        car_capacity = car['capacity']
+
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
@@ -83,7 +118,7 @@ class Ride:
                     time,
                     pickup,
                     dropoff,
-                    capacity,
+                    car_capacity,
                     driver_id,
                     price,
                     status,
@@ -175,14 +210,4 @@ class Ride:
 
     @staticmethod
     def abort_if_ride_offer_doesnt_exist(ride_id):
-        return Ride.read(ride_id)
-
-    @staticmethod
-    def get_ride_car(ride_id):
-        pass
-
-    @staticmethod
-    def get_ride_driver(ride_id):
-            pass
-
-    
+        return Ride.read(ride_id)  

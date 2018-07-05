@@ -9,6 +9,8 @@ from flask_restful import abort
 
 from flaskr.db import connectDB
 
+from flaskr.models.car import Car
+
 class User:
     def __init__(self, firstname, lastname, email, password, phone_number=None, car_registration=None):
         self.firstname = firstname
@@ -213,6 +215,13 @@ class User:
             cursor.close()
             connection.close()
             if results is None:
-                abort(400, message='The car with licence plate {} cannot be found in our records'.format(
+                abort(404, message='The car with licence plate {} cannot be found in our records'.format(
                     registration))
             return results
+
+    @staticmethod
+    def get_car(user_id):
+        user = User.read(user_id)
+        if user['car_registration'] is None:
+            abort(404, message='You have no car yet, enter your car details first to proceed')
+        return Car.read(user['car_registration'])
