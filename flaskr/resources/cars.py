@@ -98,7 +98,6 @@ class CarResource(Resource):
 
 
     # PUT method for editing a car
-
     @jwt_required
     def put(self, registration):
         """
@@ -165,7 +164,6 @@ class CarResource(Resource):
 
 
     # DELETE method for deleting a car
-
     @jwt_required
     def delete(self, registration):
         """

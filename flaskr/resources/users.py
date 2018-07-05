@@ -144,7 +144,10 @@ class LoginResource(Resource):
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return User.login(args['email'], args['password'])
+        if match_email(args['email']):
+          return User.login(args['email'], args['password'])
+        return {'status': 'failed', 'message': 'Invalid email address, try again'}, 202
+
 
 
 class UserResource(Resource):

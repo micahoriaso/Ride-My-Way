@@ -7,14 +7,23 @@ from flaskr.db import connectDB
 
 
 class Car:
+    """A representation of a car.
+
+    :param registration: A string, the car's licence plate.
+    :param model: An int, the car's model.
+    :param capacity: An int, the car's passenger capacity.
+    """
     def __init__(self, registration, model, capacity):
         self.registration = registration
         self.model = model
         self.capacity = capacity
 
-    # method returns all cars
     @staticmethod
     def browse():
+        """A method to get all cars.
+
+        :return: A list of dictionaries with all rides
+        """
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
@@ -39,9 +48,13 @@ class Car:
                 data.append(item)
             return {'status': 'success', 'message': 'Fetch successful', 'data': data}, 200
 
-    # method returns the details of a car
     @staticmethod
     def read(car_registration):
+        """
+        A method to get the details of a car.
+        :param car_registration: string, The car's licence plate
+        :return: car details
+        """
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
@@ -64,9 +77,15 @@ class Car:
         }
         return car
 
-    # method for updating a car
     @staticmethod
     def edit(car_registration, model, capacity):
+        """
+        A method to edit the details of a car.
+        :param registration: A string, the car's licence plate.
+        :param model: An int, the car's model.
+        :param capacity: An int, the car's passenger capacity.
+        :return: Http Response
+        """
         Car.abort_if_car_doesnt_exist(car_registration)
         if Car.capacity_greater_than_zero(capacity):
             connection = connectDB()
@@ -95,8 +114,11 @@ class Car:
             return {'status': 'success', 'data': 'Car successfully updated'}, 200
         return {'status': 'failed', 'message': 'Car capacity cannot be below one'}, 202
 
-    # method for creating a new car
     def add(self):
+        """
+        A method to create a car.
+        :return: Http Response
+        """
         Car.abort_if_car_registration_is_already_used(self.registration)
         if Car.capacity_greater_than_zero(self.capacity):
             connection = connectDB()
@@ -116,9 +138,13 @@ class Car:
             return {'status': 'success', 'message': 'Car created successfully'}, 201
         return {'status': 'failed', 'message': 'Car capacity cannot be below one'}, 202
 
-    # method for deleting a car
     @staticmethod
     def delete(car_registration):
+        """
+        A method to delete a car.
+        :param registration: A string, the car's licence plate.
+        :return: Http Response
+        """
         Car.abort_if_car_doesnt_exist(car_registration)
         connection = connectDB()
         cursor = connection.cursor(
@@ -136,6 +162,11 @@ class Car:
     
     @staticmethod
     def abort_if_car_registration_is_already_used(registration):
+        """
+        A method to check if a car's liceence plate is unique.
+        :param registration: A string, the car's licence plate.
+        :return: Http Response
+        """
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
@@ -155,10 +186,20 @@ class Car:
 
     @staticmethod
     def abort_if_car_doesnt_exist(registration):
+        """
+        A method to check if a car exists in the database.
+        :param registration: A string, the car's licence plate.
+        :return: Http Response
+        """
         return Car.read(registration)
 
     @staticmethod
     def capacity_greater_than_zero(capacity):
+        """
+        A method to check if a car's capacity is greater than zero.
+        :param capacity: An int, the car's passenger capacity.
+        :return: Http Response
+        """
         if capacity > 0:
             return True
         return False        

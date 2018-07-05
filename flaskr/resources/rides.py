@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required
 
 from flaskr.models.ride import Ride
 
-from flaskr.resources.helpers import check_for_empty_fields
+from flaskr.resources.helpers import check_for_empty_fields, validate_date
 
 
 class RideListResource(Resource):
@@ -36,7 +36,7 @@ class RideListResource(Resource):
         super(RideListResource, self).__init__()
 
     # GET method for ride list
-    # @jwt_required
+    @jwt_required
     def get(self):
         """
         Endpoint for getting a list of all ride offers
@@ -56,7 +56,7 @@ class RideListResource(Resource):
         return Ride.browse()
 
     # POST method for new ride request
-    # @jwt_required
+    @jwt_required
     def post(self):
         """
         Endpoint for creating a ride offer
@@ -106,6 +106,7 @@ class RideListResource(Resource):
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
+        validate_date(args['date'])
         ride = Ride(
             args['date'],
             args['time'],
@@ -139,7 +140,7 @@ class RideResource(Resource):
             'driver_id', type=int, required=True, help='Please enter the driver', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location=['form', 'json']
+            'status', type=str, required=False, help='Please enter the ride status', default=Ride.STATUS_STARTED, location=['form', 'json']
         )
 
         super(RideResource, self).__init__()
@@ -147,7 +148,7 @@ class RideResource(Resource):
 
     # PUT method for editing a ride request
 
-    # @jwt_required
+    @jwt_required
     def put(self, ride_id):
         """
         Endpoint for updating a ride offer
@@ -193,6 +194,14 @@ class RideResource(Resource):
             description: The price of the ride.
             type: integer
             format: float
+          - name: status
+            in: formData
+            description: The status of the ride.
+            type: string
+            enum:
+              - "In Offer"
+              - "Started"
+              - "Done"
         responses:
           500:
             description: Internal server error
@@ -213,7 +222,7 @@ class RideResource(Resource):
                 )
         
     # GET method for a ride request
-    # @jwt_required
+    @jwt_required
     def get(self, ride_id):
         """
         Endpoint for getting a ride offer's details
@@ -239,7 +248,7 @@ class RideResource(Resource):
 
 
     # DELETE method for deleting a ride request
-    # @jwt_required
+    @jwt_required
     def delete(self, ride_id):
         """
         Endpoint for deleting a ride

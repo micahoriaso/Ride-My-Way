@@ -12,6 +12,14 @@ from flaskr.db import connectDB
 from flaskr.models.car import Car
 
 class User:
+    """A representation of a user.
+    :param firstname: A string, the firstname of the user.
+    :param lastname: A string, the lastname of the user.
+    :param email: A string, the email address of the user.
+    :param password: A string, the password of the user.
+    :param phone_number: A string, the phone number of the user.
+    :param car_registration: A string, the licence plate of the user's car.
+    """
     def __init__(self, firstname, lastname, email, password, phone_number=None, car_registration=None):
         self.firstname = firstname
         self.lastname = lastname
@@ -24,9 +32,12 @@ class User:
         )
         self.car_registration = car_registration
 
-    # method returns the details of a user
     @staticmethod
     def read(user_id):
+        """A method to get all details of a user.
+        :param user_id: An int, a unique identifier of the user.
+        :return: user details
+        """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         try:
@@ -52,9 +63,17 @@ class User:
         }
         return user
 
-    # method for updating a user
     @staticmethod
     def edit(user_id, firstname, lastname, password, phone_number=None, car_registration=None):
+        """
+        A method to accept/decline a ride request.
+        :param firstname: A string, the firstname of the user.
+        :param lastname: A string, the lastname of the user.
+        :param password: A string, the password of the user.
+        :param phone_number: A string, the phone number of the user.
+        :param car_registration: A string, the licence plate of the user's car.
+        :return: Http Response
+        """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         User.abort_if_user_doesnt_exist(user_id)
@@ -92,8 +111,11 @@ class User:
         connection.close()
         return {'status': 'success', 'message': 'User updated successfully'}, 200
 
-    # method for creating a new user
     def add(self):
+        """
+        A method to create a user.
+        :return: Http Response
+        """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         User.abort_if_email_is_already_used(self.email)
@@ -136,6 +158,12 @@ class User:
 
     @staticmethod
     def login(email, password):
+        """
+        A method to login a user.
+        :param email: A string, the email address of the user.
+        :param password: A string, the password of the user.
+        :return: Http Response
+        """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         try:
@@ -162,9 +190,13 @@ class User:
             abort(404, message='The user with email {} does not exist'.format(
                 email))
 
-    # method for deleting a user
     @staticmethod
     def delete(user_id):
+        """
+        A method to delete a user.
+        :param user_id: An int, the unique identifier of the user.
+        :return: Http Response
+        """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         User.abort_if_user_doesnt_exist(user_id)
@@ -181,10 +213,20 @@ class User:
 
     @staticmethod
     def abort_if_user_doesnt_exist(user_id):
+        """
+        A method to check if a  user exists.
+        :param user_id: An int, the unique identifier of the user.
+        :return: Http Response
+        """
         return User.read(user_id)
 
     @staticmethod
     def abort_if_email_is_already_used(email):
+        """
+        A method to check if an email address is already used.
+        :param email: A string, the email address of the user.
+        :return: Http Response
+        """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         try:
@@ -202,6 +244,11 @@ class User:
 
     @staticmethod
     def abort_if_car_doesnt_exist(registration):
+        """
+        A method to check if a car exists.
+        :param registration: A string, the licence plate of the user's car.
+        :return: Http Response
+        """
         if registration is not None:
             connection = connectDB()
             cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -221,6 +268,11 @@ class User:
 
     @staticmethod
     def get_car(user_id):
+        """
+        A method to get a user's car details.
+        :param user_id: An int, the unique identifier of the user.
+        :return: Http Response
+        """
         user = User.read(user_id)
         if user['car_registration'] is None:
             abort(404, message='You have no car yet, enter your car details first to proceed')

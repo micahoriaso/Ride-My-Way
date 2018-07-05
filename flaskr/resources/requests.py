@@ -18,13 +18,13 @@ class RequestListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'requestor_id', type=int, required=True, help='Please enter requestor', location='json'
+            'requestor_id', type=int, required=True, help='Please enter requestor', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'request_status', type=str, location='json', default='Requested'
+            'request_status', type=str, location=['form', 'json'], default=RideRequest.STATUS_REQUESTED
         )
         self.reqparse.add_argument(
-            'ride_id', type=int, location='json'
+            'ride_id', type=int, location=['form', 'json']
         )
         super(RequestListResource, self).__init__()
 
@@ -66,30 +66,18 @@ class RequestListResource(Resource):
           - name: ride_id
             in: path
             required: true
-          - name: body
-            in: body
+            type: integer
+            description: Unique identifier of the ride offer.
+          - name: requestor_id
+            in: formData
             required: true
-            schema:
-              id: RideRequest
-              required:
-                - requestor_id
-              properties:
-                requestor_id:
-                  type: integer
-                  description: Unique identifier of the requestor.
-                # request_status:
-                #   type: string
-                #   description: Current status of the request.
-                # ride_id:
-                #   type: string
-                #   description: Unique identifier of the ride offer.
+            type: integer
+            description: Unique identifier of the requestor.
         responses:
           500:
             description: Internal server error
           201:
             description: Ride successfully requested
-            schema:
-              $ref: '#/definitions/RideRequest'
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
@@ -101,7 +89,7 @@ class RequestResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'request_status', type=str, location='json', default='Pending'
+            'request_status', type=str, location=['form', 'json'], default=RideRequest.STATUS_REQUESTED
         )
         super(RequestResource, self).__init__()
 
@@ -175,31 +163,28 @@ class RequestResource(Resource):
           - name: ride_id
             in: path
             required: true
+            type: integer
+            description: Unique identifier of the ride offer.
           - name: request_id
             in: path
             required: true
-          - name: body
-            in: body
+            type: integer
+            description: Unique identifier of the ride request.
+          - name: request_status
+            in: formData
             required: true
-            schema:
-              id: UpdateRideRequest
-              required:
-                - requestor_id
-              properties:
-                request_status:
-                  type: string
-                  description: Current status of the request.
-                  enum:
-                    - "Pending"
-                    - "Accepted"
-                    - "Declined"
+            type: string
+            description: Current status of the request.
+            enum:
+              - "Accepted"
+              - "Declined"
         responses:
           500:
             description: Internal server error
           201:
             description: Ride request successfully updated
-            schema:
-              $ref: '#/definitions/UpdateRideRequest'
+            # schema:
+            #   $ref: '#/definitions/UpdateRideRequest'
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)

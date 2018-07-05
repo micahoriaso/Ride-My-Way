@@ -1,6 +1,7 @@
 import pytest, json
 
 import flaskr
+from flaskr.resources.helpers import get_db_rows
 
 @pytest.fixture
 def test_case_data(client, auth_header, header):
@@ -15,16 +16,12 @@ def test_case_data(client, auth_header, header):
             'request_status': 'Accepted'
         },
         '4': {
+            'date': '2018-06-12',
             'time': '11:00',
-            'date': '12-06-2018',
             'pickup': 'Nyayo Stadium',
             'dropoff': 'Belle Vue',
             'price': '100',
-            'capacity': '3',
-            'available_seats': '1',
             'driver_id': 1,
-            'car': 'Mazda MX5',
-            'registration': 'KAA 987I'
         },
         '5': {
             "firstname": "Sharon",
@@ -32,8 +29,34 @@ def test_case_data(client, auth_header, header):
             "email": "sp@gmail.com",
             "password": "10101010",
             "confirm_password": "10101010"
-        }
+        },
+        '6': {
+            'registration': 'KAA 540H',
+            'model': 'Nissan GTR',
+            'capacity': '2',
+        },
+        '7': {
+            "firstname": "Sharon",
+            "lastname": "Paul",
+            "password": "10101010",
+            "car_registration": "KAA 540H",
+            "phone_number": "0707896325"
+        },
     }
+
+    client.post('/api/v2/auth/signup',
+        data=json.dumps(data['5']), headers=header)
+    
+    client.post(
+        '/api/v2/cars/',
+        data=json.dumps(data['6']), 
+        headers=auth_header
+        )
+
+    client.put(
+        '/api/v2/users/1',
+        data=json.dumps(data['7']), 
+        headers=auth_header)
 
     client.post(
         '/api/v2/rides/',
@@ -41,18 +64,19 @@ def test_case_data(client, auth_header, header):
         headers=auth_header
         )
 
-    client.post('/api/v2/auth/signup',
-        data=json.dumps(data['5']), headers=header)
-
     return data
 
 
 def test_add_new_ride_offer_request(client, test_case_data, auth_header):
+    pre_insert_rows = get_db_rows('select * from ride_request;')
     response = client.post(
         '/api/v2/rides/1/requests', 
         data=json.dumps(test_case_data['1']), 
         headers=auth_header
         )
+    post_insert_rows = get_db_rows('select * from ride_request;')
+
+    assert len(post_insert_rows) == len(pre_insert_rows) + 1
     assert response.status_code == 201
 
 def test_get_all_requests(client, auth_header):
@@ -71,23 +95,35 @@ def test_edit_existing_ride_offer_request(client, test_case_data, auth_header):
     assert response.status_code == 200
 
 def test_delete_existing_ride_offer_request(client, test_case_data, auth_header):
+    pre_delete_rows = get_db_rows('select * from ride_request;')
     response = client.delete(
         '/api/v2/rides/1/requests/1', 
         headers=auth_header
         )
+    post_delete_rows = get_db_rows('select * from ride_request;')
+
+    assert len(post_delete_rows) == len(pre_delete_rows) - 1
     assert response.status_code == 200
 
 def test_delete_nonexistent_ride_offer_request(client, auth_header):
+    pre_delete_rows = get_db_rows('select * from ride_request;')
     response = client.delete(
-        '/api/v2/rides/1/requests/2', 
+        '/api/v2/rides/1/requests/20', 
         headers=auth_header
         )
+    post_delete_rows = get_db_rows('select * from ride_request;')
+
+    assert len(post_delete_rows) == len(pre_delete_rows)
     assert response.status_code == 404
 
 
 def test_delete_request_from_nonexistent_ride_offer(client, auth_header):
+    pre_delete_rows = get_db_rows('select * from ride_request;')
     response = client.delete(
-        '/api/v2/rides/2/requests/1', 
+        '/api/v2/rides/200/requests/1', 
         headers=auth_header
         )
+    post_delete_rows = get_db_rows('select * from ride_request;')
+
+    assert len(post_delete_rows) == len(pre_delete_rows)
     assert response.status_code == 404
