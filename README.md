@@ -370,6 +370,8 @@ e.g.
 /api/v2/rides/2/requests/1
 ```
 
+* API Demo [Ride My Way](http://ride-my-way-micah.herokuapp.com/apidocs/)
+
 # Author
 * **Micah Oriaso** [micahoriaso](https://github.com/micahoriaso)
 
