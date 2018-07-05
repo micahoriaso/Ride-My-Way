@@ -2,6 +2,8 @@ import pytest, json
 
 import flaskr
 
+from flaskr.resources.helpers import get_db_rows
+
 @pytest.fixture
 def test_case_data():
     data = {
@@ -37,9 +39,12 @@ def test_case_data():
     return data
 
 def test_signup(client, test_case_data, header):
+    pre_insert_rows = get_db_rows('select * from app_user;')
     response = client.post('/api/v2/auth/signup', 
                            data=json.dumps(test_case_data['5']), headers=header)
+    post_insert_rows = get_db_rows('select * from app_user;')
     assert response.status_code == 201
+    assert len(post_insert_rows) == len(pre_insert_rows) + 1
 
 def test_edit_user(client, test_case_data, auth_header):
     response = client.put(
@@ -74,11 +79,15 @@ def test_delete_nonexistent_user(client, test_case_data, auth_header):
 
 
 def test_delete_existing_user(client, test_case_data, auth_header):
+    pre_delete_rows = get_db_rows('select * from app_user;')
     response = client.delete(
         '/api/v2/users/1', 
         headers=auth_header
         )
+    post_delete_rows = get_db_rows('select * from app_user;')
+
     assert response.status_code == 200
+    assert len(post_delete_rows) == len(pre_delete_rows) - 1
 
 def test_login_with_good_credentials(client, test_case_data, header):
     response = client.post(
@@ -86,6 +95,8 @@ def test_login_with_good_credentials(client, test_case_data, header):
         data=json.dumps(test_case_data['2']), 
         headers=header
         )
+    response_data = response.get_json()
+    assert response_data['access_token'] is not None
     assert response.status_code == 200
 
 
