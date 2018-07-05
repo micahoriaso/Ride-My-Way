@@ -12,20 +12,19 @@ from flaskr.resources.helpers import check_for_empty_fields
 
 class CarListResource(Resource):
     def __init__(self):
-        self.reqparse = reqparse.RequestParser()
+        self.reqparse = reqparse.RequestParser(bundle_errors=True)
         self.reqparse.add_argument(
-            'registration', type=str, required=True, help='Please enter car registration', location='json'
+            'registration', type=str, required=True, help='Please enter car registration', location=['form','json']
         )
         self.reqparse.add_argument(
-            'model', type=str, required=True, help='Please enter car model', location='json'
+            'model', type=str, required=True, help='Please enter car model', location=['form','json']
         )
         self.reqparse.add_argument(
-            'capacity', type=str, required=True, help='Please enter car capacity', location='json'
+            'capacity', type=int, required=True, help='Please enter car capacity', location=['form','json']
         )
         super(CarListResource, self).__init__()
-        self.car = Car()
 
-    # GET method for ride list
+    # GET method for car list
     @jwt_required
     def get(self):
         """
@@ -43,9 +42,9 @@ class CarListResource(Resource):
           404:
             description: There are no cars here'
         """
-        return self.car.browse()
+        return Car.browse()
 
-    # POST method for new ride request
+    # POST method for new car
     @jwt_required
     def post(self):
         """
@@ -56,56 +55,49 @@ class CarListResource(Resource):
         security:
           - Bearer: []  
         parameters:
-          - name: body
-            in: body
+          - name: registration
+            in: formData
             required: true
-            schema:
-              id: Car
-              required:
-                - registration
-                - model
-                - capacity
-              properties:
-                registration:
-                  type: string
-                  description: The licence plate of the car.
-                model:
-                  type: string
-                  description: The model of the car.
-                capacity:
-                  type: integer
-                  description: The capacity of the car.
+            description: The licence plate of the car.
+            type: string
+          - name: model
+            in: formData
+            required: true
+            description: The model of the car.
+            type: string
+          - name: capacity
+            in: formData
+            required: true
+            description: The capacity of the car.
+            type: integer
         responses:
           500:
             description: Internal server error
           201:
             description: Car created successfully
-            schema:
-              $ref: '#/definitions/Car'
+            # schema:
+            #   $ref: '#/definitions/Car'
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        self.car.abort_if_car_registration_is_already_used(
-            args['registration'])
-        return self.car.add(args['registration'],
-                           args['model'], args['capacity'])
+        car = Car(args['registration'],
+                  args['model'], args['capacity'])
+        return car.add()
 
 
 class CarResource(Resource):
     def __init__(self):
-        self.reqparse = reqparse.RequestParser()
+        self.reqparse = reqparse.RequestParser(bundle_errors=True)
         self.reqparse.add_argument(
-            'model', type=str, required=True, help='Please enter car model', location='json'
+            'model', type=str, required=True, help='Please enter car model', location=['form','json']
         )
         self.reqparse.add_argument(
-            'capacity', type=str, required=True, help='Please enter car capacity', location='json'
+            'capacity', type=int, required=True, help='Please enter car capacity', location=['form','json']
         )
-        self.car = Car()
         super(CarResource, self).__init__()
 
 
     # PUT method for editing a car
-
     @jwt_required
     def put(self, registration):
         """
@@ -119,21 +111,18 @@ class CarResource(Resource):
           - name: registration
             in: path
             required: true
-          - name: body
-            in: body
+            description: The licence plate of the car.
+            type: string
+          - name: model
+            in: formData
             required: true
-            schema:
-              id: UpdateCar
-              required:
-                - model
-                - capacity
-              properties:
-                model:
-                  type: string
-                  description: The car's model
-                capacity:
-                  type: integer
-                  description: The car's capacity.
+            description: The model of the car.
+            type: string
+          - name: capacity
+            in: formData
+            required: true
+            description: The capacity of the car.
+            type: integer
         responses:
           500:
             description: Internal server error
@@ -142,14 +131,12 @@ class CarResource(Resource):
             schema:
               $ref: '#/definitions/UpdateCar'
         """
-        self.car.abort_if_car_doesnt_exist(registration)
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return self.car.edit(registration, args['model'], args['capacity'])
+        return Car.edit(registration, args['model'], args['capacity'])
 
         
-    # GET method for a ride request
-
+    # GET method for a car
     @jwt_required
     def get(self, registration):
         """
@@ -163,6 +150,7 @@ class CarResource(Resource):
           - name: registration
             in: path
             required: true
+            type: string
         responses:
           500:
             description: Internal server error
@@ -171,12 +159,11 @@ class CarResource(Resource):
           404:
             description: There car does not exist
         """
-        request = self.car.abort_if_car_doesnt_exist(registration)
+        request = Car.read(registration)
         return {'status':'success', 'message': 'Fetch successful', 'data': request}
 
 
-    # DELETE method for deleting a ride request
-
+    # DELETE method for deleting a car
     @jwt_required
     def delete(self, registration):
         """
@@ -198,8 +185,7 @@ class CarResource(Resource):
           404:
             description: The car does not exist
         """
-        self.car.abort_if_car_doesnt_exist(registration)
-        return self.car.delete(registration)
+        return Car.delete(registration)
 
 cars_bp = Blueprint('resources.car', __name__)
 api = Api(cars_bp)

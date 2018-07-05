@@ -6,43 +6,37 @@ from flask import Blueprint
 
 from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import jwt_required
 
-from flask_jwt_extended import (create_access_token, jwt_required,
-get_jwt_identity, get_raw_jwt)
-
-from flaskr.db import connectDB
-
-from flaskr.resources.helpers import match_email, strip_whitespace, check_for_empty_fields
+from flaskr.resources.helpers import match_email, check_for_empty_fields
+from flaskr.models.user import User
 
 
 class UserListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'firstname', type=str, required=True, help='Please enter firstname', location='json'
+            'firstname', type=str, required=True, help='Please enter firstname', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'lastname', type=str, required=True, help='Please enter lastname', location='json'
+            'lastname', type=str, required=True, help='Please enter lastname', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'email', type=str, required=True, help='Please enter email', location='json'
+            'email', type=str, required=True, help='Please enter email', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'car_registration', type=str, default=None, location='json'
+            'car_registration', type=str, default=None, location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'phone_number', type=str, default=None, location='json'
+            'phone_number', type=str, default=None, location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, required=True, help='Please enter password', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'confirm_password', type=str, required=True, help='Please enter the confirm password', location='json'
+            'confirm_password', type=str, required=True, help='Please enter the confirm password', location=['form', 'json']
         )
-        self.connection = connectDB()
-        self.cursor = self.connection.cursor(
-            cursor_factory=psycopg2.extras.DictCursor)
+        
 
         super(UserListResource, self).__init__()
 
@@ -53,36 +47,34 @@ class UserListResource(Resource):
         ---
         tags:
           - User
-        security:
-          - Bearer: []  
         parameters:
-          - name: body
-            in: body
+          - name: firstname
+            in: formData
             required: true
-            schema:
-              id: User
-              required:
-                - firstname
-                - lastname
-                - email
-                - password
-                - confirm_password
-              properties:
-                firstname:
-                  type: string
-                  description: The user's firstname.
-                lastname:
-                  type: string
-                  description: The user's lastname.
-                email:
-                  type: string
-                  description: The user's email.
-                password:
-                  type: string
-                  description: The user's password.
-                confirm_password:
-                  type: string
-                  description: Confirmation of the password entered.
+            description: The user's firstname.
+            type: string
+          - name: lastname
+            in: formData
+            required: true
+            description: The user's lastname.
+            type: string
+          - name: email
+            in: formData
+            required: true
+            description: The user's email.
+            type: string
+          - name: password
+            in: formData
+            required: true
+            description: The user's password.
+            type: string
+            format: password
+          - name: confirm_password
+            in: formData
+            required: true
+            description: Confirmation of the password entered.
+            type: string
+            format: password
         responses:
           500:
             description: Internal server error
@@ -90,85 +82,36 @@ class UserListResource(Resource):
             description: Account creation successful
           202:
             description: Password is too short. At least 8 characters required
-            schema:
-              $ref: '#/definitions/User'
         """
   
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        self.abort_if_email_is_already_used(args['email'])
         if match_email(args['email']):
             if args['password'] == args['confirm_password']:
                 if len(args['password']) >= 8:
-                    try:
-                        self.cursor.execute(
-                            """INSERT INTO app_user (
-                                firstname, 
-                                lastname, 
-                                fullname, 
-                                email,
-                                phone_number,
-                                password,
-                                car_registration
-                                )
-                            VALUES (%s, %s, %s, %s, %s, %s, %s);""",
-                            (
-                                args['firstname'],
-                                args['lastname'],
-                                '{} {}'.format(
-                                    args['firstname'], args['lastname']
-                                    ),
-                                args['email'],
-                                args['phone_number'],
-                                generate_password_hash(
-                                    args['password'], 
-                                    method='sha256'
-                                    ),
-                                args['car_registration']
-                            )
-                        )
-                        self.connection.commit()
-                    except (Exception, psycopg2.DatabaseError) as error:
-                        self.connection.rollback()
-                        return {'status': 'failed', 'message': error}, 500
-                    access_token = create_access_token(identity= args['email'])
-                    return {
-                        'status': 'success', 
-                        'message': 'Account creation successful',
-                        'access_token': access_token,
-                        }, 201
+                    user = User(args['firstname'],
+                                args['lastname'], args['email'],
+                                args['password'], args['phone_number'],
+                                args['car_registration'])
+                    return user.add()
                 return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
             return {'status': 'failed', 'message': 'Password and confirm password do not match, try again'}, 202
         return {'status': 'failed', 'message': 'Invalid email address, try again'}, 202
-
-    def abort_if_email_is_already_used(self, email):
-        try:
-            self.cursor.execute('SELECT * FROM app_user WHERE email = %s ;',
-                                ([email]))
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        results = self.cursor.fetchone()
-        if results is not None:
-            abort(400, message='The email {} is already taken'.format(email))
-        return results
-
 
 class LoginResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'email', type=str, required=True, help='Please enter email', location='json'
+            'email', type=str, required=True, help='Please enter email', location=['form','json']
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, required=True, help='Please enter password', location=['form','json']
         )
-        self.connection = connectDB()
-        self.cursor = self.connection.cursor(
-            cursor_factory=psycopg2.extras.DictCursor)
+        
 
         super(LoginResource, self).__init__()
 
+    # Method for loggin in a user
     def post(self):
         """
         Endpoint for user log in
@@ -178,79 +121,55 @@ class LoginResource(Resource):
         security:
           - Bearer: []  
         parameters:
-          - name: body
-            in: body
+          - name: email
+            in: formData
             required: true
-            schema:
-              id: Login
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  description: The user's email.
-                password:
-                  type: string
-                  description: The user's password.
+            description: The user's email.
+            type: string
+          - name: password
+            in: formData
+            required: true
+            description: The user's password.
+            type: string
+            format: password
         responses:
           500:
             description: Internal server error
           200:
             description: Login successful
           202:
-            description: Invalid email/password combination
+            description: Wrong password, please try again.
           404:
             description: The user with email string does not exist
-            schema:
-              $ref: '#/definitions/Login'
-              """
+        """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        try:
-            self.cursor.execute('SELECT * FROM app_user WHERE email = %s ;',
-                                ([args['email']]))
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        results = self.cursor.fetchone()
-        if results is not None:
-            if results['email'] == args['email'] and check_password_hash(results['password'], args['password']):
-                access_token = create_access_token(
-                    identity=args['email'])
-                return {
-                    'status': 'success', 
-                    'message': 'Login successful',
-                    'access_token': access_token,
-                }, 200
-            return {'status': 'failed', 'message': 'Invalid email/password combination'}, 202
-        else:
-            abort(404, message='The user with email {} does not exist'.format(
-                args['email']))
+        if match_email(args['email']):
+          return User.login(args['email'], args['password'])
+        return {'status': 'failed', 'message': 'Invalid email address, try again'}, 202
+
 
 
 class UserResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'firstname', type=str, required=True, help='Please enter firstname', location='json'
+            'firstname', type=str, required=True, help='Please enter firstname', location=['form','json']
         )
         self.reqparse.add_argument(
-            'lastname', type=str, required=True, help='Please enter lastname', location='json'
+            'lastname', type=str, required=True, help='Please enter lastname', location=['form','json']
         )
         self.reqparse.add_argument(
-            'car_registration', location='json'
+            'car_registration', location=['form','json']
         )
         self.reqparse.add_argument(
-            'phone_number', location='json'
+            'phone_number', location=['form','json']
         )
         self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location='json'
+            'password', type=str, required=True, help='Please enter password', location=['form','json']
         )
 
-        self.connection = connectDB()
-        self.cursor = self.connection.cursor(
-            cursor_factory=psycopg2.extras.DictCursor)
+        
         super(UserResource, self).__init__()
 
     # DELETE method for deleting a user
@@ -267,6 +186,7 @@ class UserResource(Resource):
           - name: user_id
             in: path
             required: true
+            type: integer
         responses:
           500:
             description: Internal server error
@@ -274,18 +194,8 @@ class UserResource(Resource):
             description: User successfully deleted
           404:
             description: The user does not exist
-            schema:
-              $ref: '#/definitions/UserUpdate'
         """
-        self.abort_if_user_doesnt_exist(user_id)
-        try:
-            self.cursor.execute('DELETE FROM app_user WHERE id = %s ;',
-                                ([user_id]))
-            self.connection.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'message': error}, 200
-        return {'status': 'success', 'message': 'User successfully deleted'}, 200
+        return User.delete(user_id)
 
     # GET method for a user
     @jwt_required
@@ -301,6 +211,7 @@ class UserResource(Resource):
           - name: user_id
             in: path
             required: true
+            type: integer
         responses:
           500:
             description: Internal server error
@@ -308,11 +219,8 @@ class UserResource(Resource):
             description: Fetch successfull
           404:
             description: The user does not exist
-            schema:
-              $ref: '#/definitions/UserUpdate'
         """
-        request = self.abort_if_user_doesnt_exist(user_id)
-        return {'status': 'success', 'message': 'Fetch successful', 'data': request}
+        return User.read(user_id)
 
     # PUT method for updating user
     @jwt_required
@@ -323,38 +231,36 @@ class UserResource(Resource):
         tags:
           - User
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: user_id
             in: path
             required: true
-          - name: body
-            in: body
+            type: integer
+          - name: firstname
+            in: formData
             required: true
-            schema:
-              id: UserUpdate
-              required:
-                - firstname
-                - lastname
-                - password
-                - car_registration
-                - phone_number
-              properties:
-                firstname:
-                  type: string
-                  description: The user's firstname.
-                lastname:
-                  type: string
-                  description: The user's lastname.
-                password:
-                  type: string
-                  description: The user's password.
-                car_registration:
-                  type: string
-                  description: The user's car licence plate.
-                phone_number:
-                  type: string
-                  description: The user's phone number.
+            description: The user's firstname.
+            type: string
+          - name: lastname
+            in: formData
+            required: true
+            description: The user's lastname.
+            type: string
+          - name: password
+            in: formData
+            required: true
+            description: The user's password.
+            type: string
+            format: password
+          - name: car_registration
+            in: formData
+            description: The user's car licence plate.
+            type: string
+          - name: phone_number
+            in: formData
+            description: The user's phone number.
+            type: string
         responses:
           500:
             description: Internal server error
@@ -362,56 +268,18 @@ class UserResource(Resource):
             description: Update successful
           404:
             description: The user does not exist
-            schema:
-              $ref: '#/definitions/UserUpdate'
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        self.abort_if_user_doesnt_exist(user_id)
         if len(args['password']) >= 8:
-            try:
-                self.cursor.execute(
-                    """UPDATE app_user SET
-                        firstname = %s, 
-                        lastname = %s, 
-                        fullname = %s, 
-                        phone_number = %s, 
-                        password = %s, 
-                        car_registration = %s 
-                    WHERE id = %s;""",
-                    (
-                        args['firstname'],
-                        args['lastname'],
-                        '{} {}'.format(
-                            args['firstname'], args['lastname']
-                        ),
-                        args['phone_number'],
-                        generate_password_hash(
-                            args['password'],
-                            method='sha256'
-                        ),
-                        args['car_registration'],
-                        int(user_id)
-                    )
-                )
-                self.connection.commit()
-            except (Exception, psycopg2.DatabaseError) as error:
-                self.connection.rollback()
-                return {'status': 'failed', 'data': error}, 500
-            return {'status': 'success', 'data': args}, 200
+            return User.edit(
+                user_id,
+                args['firstname'],
+                args['lastname'],
+                args['password'], args['phone_number'],
+                args['car_registration']
+            )
         return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
-
-    def abort_if_user_doesnt_exist(self, user_id):
-        try:
-            self.cursor.execute('SELECT * FROM app_user WHERE id = %s ;',
-                                ([user_id]))
-        except (Exception, psycopg2.DatabaseError) as error:
-            self.connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        results = self.cursor.fetchone()
-        if results is None:
-            abort(404, message='The user with id {} does not exist'.format(user_id))
-        return results
 
 
 

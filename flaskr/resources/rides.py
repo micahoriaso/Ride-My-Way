@@ -9,43 +9,30 @@ from flask_jwt_extended import jwt_required
 
 from flaskr.models.ride import Ride
 
-from flaskr.resources.helpers import check_for_empty_fields
+from flaskr.resources.helpers import check_for_empty_fields, validate_date
 
 
 class RideListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'dropoff', type=str, required=True, help='Please enter dropoff', location='json'
+            'dropoff', type=str, required=True, help='Please enter dropoff', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'pickup', type=str, required=True, help='Please enter pickup', location='json'
+            'pickup', type=str, required=True, help='Please enter pickup', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'time', type=str, required=True, help='Please enter time', location='json'
+            'time', type=str, required=True, help='Please enter time', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'price', type=float, required=True, help='Please enter price', location='json'
+            'price', type=float, required=True, help='Please enter price', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'date', type=str, required=True, help='Please enter the date', location='json'
+            'date', type=str, required=True, help='Please enter the date', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'capacity', type=int, required=True, help='Please enter the vehicle capacity', location='json'
+            'driver_id', type=int, required=True, help='Please enter the driver', location=['form', 'json']
         )
-        self.reqparse.add_argument(
-            'available_seats', type=int, required=True, help='Please enter the available seats', location='json'
-        )
-        self.reqparse.add_argument(
-            'driver_id', type=int, required=True, help='Please enter the driver', location='json'
-        )
-        self.reqparse.add_argument(
-            'registration', type=str, required=True, help='Please enter the registration', location='json'
-        )
-        self.reqparse.add_argument(
-            'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location='json'
-        )
-        self.ride = Ride()
         super(RideListResource, self).__init__()
 
     # GET method for ride list
@@ -66,7 +53,7 @@ class RideListResource(Resource):
           404:
             description: There are no rides offers yet'
         """
-        return self.ride.browse()
+        return Ride.browse()
 
     # POST method for new ride request
     @jwt_required
@@ -77,114 +64,85 @@ class RideListResource(Resource):
         tags:
           - Ride
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
-          - name: body
-            in: body
+          - name: date
+            in: formData
             required: true
-            schema:
-              id: Ride
-              required:
-                - date
-                - time
-                - pickup
-                - dropoff
-                - capacity
-                - seats_available
-                - driver_id
-                - registration
-                - price
-                - status
-              properties:
-                date:
-                  type: string
-                  description: Date the ride will be taken.
-                time:
-                  type: string
-                  description: Time the ride will start.
-                pickup:
-                  type: string
-                  description: Place the ride will be taken from.
-                dropoff:
-                  type: string
-                  description: Destination of the ride.
-                capacity:
-                  type: string
-                  description: The car's passenger capacity.
-                seats_available:
-                  type: string
-                  description: The seats that are still on offer.
-                driver_id:
-                  type: string
-                  description: Unique identifier of the driver.
-                registration:
-                  type: string
-                  description: The car's licence plate.
-                price:
-                  type: string
-                  description: The price of the ride.
-                status:
-                  type: string
-                  description: The status of the ride.
+            description: Date the ride will be taken.
+            type: string
+            format: date
+          - name: time
+            in: formData
+            required: true
+            description: Time the ride will start.
+            type: string
+          - name: pickup
+            in: formData
+            required: true
+            description: Place the ride will be taken from.
+            type: string
+          - name: dropoff
+            in: formData
+            required: true
+            description: Destination of the ride.
+            type: string
+          - name: driver_id
+            in: formData
+            required: true
+            description: Unique identifier of the driver.
+            type: integer
+          - name: price
+            in: formData
+            required: true
+            description: The price of the ride.
+            type: integer
+            format: float
         responses:
           500:
             description: Internal server error
           201:
             description: Ride creation successful
-            schema:
-              $ref: '#/definitions/Ride'
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return self.ride.add(
-                    args['date'], 
-                    args['time'], 
-                    args['pickup'], 
-                    args['dropoff'], 
-                    args['capacity'], 
-                    args['available_seats'], 
-                    args['driver_id'], 
-                    args['registration'], 
-                    args['price'], 
-                    args['status']
-                )
+        validate_date(args['date'])
+        ride = Ride(
+            args['date'],
+            args['time'],
+            args['pickup'],
+            args['dropoff'],
+            args['driver_id'],
+            args['price']
+        )
+        return ride.add()
 
 
 class RideResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'dropoff', type=str, required=True, help='Please enter dropoff', location='json'
+            'dropoff', type=str, required=True, help='Please enter dropoff', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'pickup', type=str, required=True, help='Please enter pickup', location='json'
+            'pickup', type=str, required=True, help='Please enter pickup', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'time', type=str, required=True, help='Please enter time', location='json'
+            'time', type=str, required=True, help='Please enter time', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'price', type=float, required=True, help='Please enter price', location='json'
+            'price', type=float, required=True, help='Please enter price', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'date', type=str, required=True, help='Please enter the date', location='json'
+            'date', type=str, required=True, help='Please enter the date', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'capacity', type=int, required=True, help='Please enter the vehicle capacity', location='json'
+            'driver_id', type=int, required=True, help='Please enter the driver', location=['form', 'json']
         )
         self.reqparse.add_argument(
-            'available_seats', type=int, required=True, help='Please enter the available seats', location='json'
-        )
-        self.reqparse.add_argument(
-            'driver_id', type=int, required=True, help='Please enter the driver', location='json'
-        )
-        self.reqparse.add_argument(
-            'registration', type=str, required=True, help='Please enter the registration', location='json'
-        )
-        self.reqparse.add_argument(
-            'status', type=str, required=False, help='Please enter the ride status', default='In Offer', location='json'
+            'status', type=str, required=False, help='Please enter the ride status', default=Ride.STATUS_STARTED, location=['form', 'json']
         )
 
-        self.ride = Ride()
         super(RideResource, self).__init__()
 
 
@@ -203,73 +161,61 @@ class RideResource(Resource):
           - name: ride_id
             in: path
             required: true
-          - name: body
-            in: body
+            description: Unique identifier of the ride.
+            type: integer
+          - name: date
+            in: formData
             required: true
-            schema:
-              id: Ride
-              required:
-                - date
-                - time
-                - pickup
-                - dropoff
-                - capacity
-                - seats_available
-                - driver_id
-                - registration
-                - price
-                - status
-              properties:
-                date:
-                  type: string
-                  description: Date the ride will be taken.
-                time:
-                  type: string
-                  description: Time the ride will start.
-                pickup:
-                  type: string
-                  description: Place the ride will be taken from.
-                dropoff:
-                  type: string
-                  description: Destination of the ride.
-                capacity:
-                  type: string
-                  description: The car's passenger capacity.
-                seats_available:
-                  type: string
-                  description: The seats that are still on offer.
-                driver_id:
-                  type: string
-                  description: Unique identifier of the driver.
-                registration:
-                  type: string
-                  description: The car's licence plate.
-                price:
-                  type: string
-                  description: The price of the ride.
-                status:
-                  type: string
-                  description: The status of the ride.
+            description: Date the ride will be taken.
+            type: string
+          - name: time
+            in: formData
+            required: true
+            description: Time the ride will start.
+            type: string
+          - name: pickup
+            in: formData
+            required: true
+            description: Place the ride will be taken from.
+            type: string
+          - name: dropoff
+            in: formData
+            required: true
+            description: Destination of the ride.
+            type: string
+          - name: driver_id
+            in: formData
+            required: true
+            description: Unique identifier of the driver.
+            type: integer
+          - name: price
+            in: formData
+            required: true
+            description: The price of the ride.
+            type: integer
+            format: float
+          - name: status
+            in: formData
+            description: The status of the ride.
+            type: string
+            enum:
+              - "In Offer"
+              - "Started"
+              - "Done"
         responses:
           500:
             description: Internal server error
           201:
             description: Ride creation successful
-            schema:
-              $ref: '#/definitions/Ride'
         """
-        self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        return self.ride.edit(
+        return Ride.edit(
                     args['date'], 
                     args['time'], 
                     args['pickup'], 
                     args['dropoff'], 
-                    args['capacity'], 
-                    args['available_seats'], 
                     args['driver_id'], 
-                    args['registration'], 
                     args['price'], 
                     args['status'], 
                     ride_id
@@ -297,12 +243,11 @@ class RideResource(Resource):
           404:
             description: There ride offer does not exist
         """
-        request = self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
+        request = Ride.read(ride_id)
         return {'status':'success', 'message': 'Fetch successful', 'data': request}
 
 
     # DELETE method for deleting a ride request
-
     @jwt_required
     def delete(self, ride_id):
         """
@@ -324,8 +269,7 @@ class RideResource(Resource):
           404:
             description: The ride offer does not exist
         """
-        self.ride.abort_if_ride_offer_doesnt_exist(ride_id)
-        return self.ride.delete(ride_id)
+        return Ride.delete(ride_id)
 
 rides_bp = Blueprint('resources.rides', __name__)
 api = Api(rides_bp)
