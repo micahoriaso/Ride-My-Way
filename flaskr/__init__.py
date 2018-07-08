@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 
 from flask_restful import Api
@@ -10,9 +12,16 @@ from flaskr.resources.requests import requests_bp
 from flaskr.resources.rides import rides_bp
 from flaskr.resources.users import users_bp
 from flaskr.resources.cars import cars_bp
+from flaskr.db import create_db_tables
+
+
+
 
 def create_app():
-    # Create an instance of the flask application
+    """
+    Create an instance of the flask application
+    """
+
     app = Flask(__name__)
     app.config['SWAGGER'] = {
         'title': 'Ride My Way',
@@ -26,15 +35,27 @@ def create_app():
         },
     }
     app.url_map.strict_slashes = False
-    app.config['JWT_SECRET_KEY'] = 'my_secret_key'
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 
     Swagger(app)
     JWTManager(app)
 
+    """
+    Flask blueprints
+    """
     app.register_blueprint(requests_bp)
     app.register_blueprint(rides_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(cars_bp)
+
+    """
+    Flask application commands
+    """
+    @app.cli.command('initdb')
+    def initdb_command():
+        """Initializes the database."""
+        create_db_tables()
+        print('Initialized the database.')
 
     if __name__ == '__main__':
         app.run(debug=True)
