@@ -35,7 +35,8 @@ def create_app():
         },
     }
     app.url_map.strict_slashes = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+
+    app.config['JWT_SECRET_KEY'] = "?JVN\x04*\x15\x0c.w\x01I\x11\xd1@Z\xfc\xc8#\xdf\xf4\x83\x93\xf8"
 
     Swagger(app)
     JWTManager(app)
