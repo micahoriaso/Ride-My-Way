@@ -1,14 +1,17 @@
 import os
 import psycopg2
 import psycopg2.extras
+from urllib.parse import urlparse
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 def connectDB():
-    # connection_string = 'dbname=ride_my_way user=oriaso password=root100 host=localhost'
+    connection_string = urlparse(os.getenv('DATABASE_URL'))
+    username = connection_string.username
+    password = connection_string.password
+    hostname = connection_string.hostname
+    database = connection_string.path[1:]
     try:
-        # return psycopg2.connect(connection_string)
-        print(os.getenv('DATABASE_NAME'))
-        return psycopg2.connect(dbname=os.getenv('DATABASE_NAME'), user=os.getenv('DATABASE_USER'), password=os.getenv('DATABASE_PASSWORD'), host=os.getenv('DATABASE_HOST'))
+        return psycopg2.connect(dbname=database, user=username, password=password, host=hostname)
     except:
         print('Can\'t connect to database')
 
