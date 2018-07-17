@@ -1,4 +1,4 @@
-import pytest, json
+import pytest, json, os
 
 import flaskr
 
@@ -39,6 +39,8 @@ def test_case_data():
     return data
 
 def test_signup(client, test_case_data, header):
+    print(os.getenv('DATABASE_URL'))
+
     pre_insert_rows = get_db_rows('select * from app_user;')
     response = client.post('/api/v2/auth/signup', 
                            data=json.dumps(test_case_data['5']), headers=header)

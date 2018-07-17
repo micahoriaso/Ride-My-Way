@@ -5,7 +5,9 @@ from urllib.parse import urlparse
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 def connectDB():
-    connection_string = urlparse(os.getenv('DATABASE_URL'))
+    db_uri = os.environ.get(
+        'DATABASE_URL', default='postgresql://oriaso:root100@127.0.0.1:5432/ride_my_way')
+    connection_string = urlparse(db_uri)
     username = connection_string.username
     password = connection_string.password
     hostname = connection_string.hostname
