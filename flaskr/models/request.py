@@ -77,18 +77,13 @@ class RideRequest:
         results = cursor.fetchone()
         cursor.close()
         connection.close()
-
-        if results is None:
-            abort(
-                404, message='The ride request with id {} does not exist'.format(request_id)
-            )
         request = {
             'id': results['id'],
             'ride_id': results['ride_id'],
             'requestor': User.read(results['requestor_id'])['fullname'],
             'request_status': results['request_status'],
         }
-        return request
+        return request, 200
 
     @staticmethod
     def edit(ride_id, request_id, request_status):

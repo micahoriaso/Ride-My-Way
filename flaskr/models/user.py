@@ -185,9 +185,9 @@ class User:
                     'message': 'Login successful',
                     'access_token': access_token,
                 }, 200
-            return {'status': 'failed', 'message': 'Wrong password, please try again'}, 202
+            return {'status': 'failed', 'message': 'Wrong password, please try again'}, 401
         else:
-            abort(404, message='The user with email {} does not exist'.format(
+            abort(401, message='The user with email {} does not exist'.format(
                 email))
 
     @staticmethod

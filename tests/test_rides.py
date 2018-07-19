@@ -49,7 +49,20 @@ def test_case_data(client, auth_header, header):
             "password": "10101010",
             "car_registration": "KAA 540H",
             "phone_number": "0707896325"
-        }
+        },
+        '8': {
+            'date': '2018-06-12',
+            'time': '11:00',
+            'pickup': 'Nyayo Stadium',
+            'dropoff': 'Belle Vue',
+            'price': '100',
+            'capacity': '3',
+            'available_seats': '1',
+            'driver_id': 1,
+            'car': 'Mazda MX5',
+            'registration': 'KAA 987I',
+            'status': 'Completed'
+        },
     }
 
     client.post(
@@ -70,6 +83,13 @@ def test_case_data(client, auth_header, header):
         headers=auth_header)
     return data
 
+
+def test_get_empty_ride_offer(client, test_case_data, auth_header):
+    response = client.get('/api/v2/rides/',
+                          headers=auth_header)
+    response_data = response.get_json()
+    assert response.status_code == 404
+    assert response_data['message'] == 'There are no rides offers yet'
 
 def test_add_new_ride_offer(client, test_case_data, auth_header):
     pre_insert_rows = get_db_rows('select * from ride;')
@@ -99,6 +119,17 @@ def test_edit_existing_ride_offer(client, test_case_data, auth_header):
     response = client.put('/api/v2/rides/1', 
                           data=json.dumps(test_case_data['1']), headers=auth_header)
     assert response.status_code == 200
+
+
+def test_edit_ride_offer_with_invalid_status(client, test_case_data, auth_header):
+    response = client.put(
+        '/api/v2/rides/1',
+        data=json.dumps(test_case_data['8']),
+        headers=auth_header
+    )
+    response_data = response.get_json()
+    assert response.status_code == 404
+    assert response_data['message'] == 'You entered an invalid ride status'
 
 def test_delete_existing_ride(client, auth_header):
     pre_delete_rows = get_db_rows('select * from ride;')
