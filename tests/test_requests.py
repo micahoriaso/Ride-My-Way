@@ -16,7 +16,7 @@ def test_case_data(client, auth_header, header):
             'requestor_id': 2,
         },
         '3': {
-            'request_status': 'Accepted'
+            'request_status': 'Declined'
         },
         '4': {
             'date': '2018-06-12',

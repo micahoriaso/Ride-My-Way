@@ -76,7 +76,6 @@ class User:
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         User.abort_if_user_doesnt_exist(user_id)
-        User.abort_if_car_doesnt_exist(car_registration)
         try:
             cursor.execute(
                 """UPDATE app_user SET
@@ -240,45 +239,6 @@ class User:
         if results is not None:
             abort(400, message='The email {} is already taken'.format(email))
         return results
-
-    @staticmethod
-    def abort_if_car_doesnt_exist(registration):
-        """
-        A method to check if a car exists.
-        :param registration: A string, the licence plate of the user's car.
-        :return: Http Response
-        """
-        if registration is not None:
-            connection = connectDB()
-            cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            try:
-                cursor.execute('SELECT * FROM car WHERE id = %s ;',
-                            ([registration]))
-            except (Exception, psycopg2.DatabaseError) as error:
-                connection.rollback()
-                return {'status': 'failed', 'data': error}, 500
-            results = cursor.fetchone()
-            cursor.close()
-            connection.close()
-            if results is None:
-                abort(404, message='The car with licence plate {} cannot be found in our records'.format(
-                    registration))
-            return results
-
-    # @staticmethod
-    # def get_car(user_id):
-    #     """
-    #     A method to get a user's car details.
-    #     :param user_id: An int, the unique identifier of the user.
-    #     :return: Http Response
-    #     """
-    #     user = User.read(user_id)
-    #     if user['car_registration'] is None:
-    #         abort(404, message='You have no car yet, enter your car details first to proceed')
-
-    #     from flaskr.models.car import Car
-    #     return Car.read(user_id)
-
 
     @staticmethod
     def get_by_email(email):

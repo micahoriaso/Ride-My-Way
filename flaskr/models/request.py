@@ -20,7 +20,7 @@ class RideRequest:
     STATUS_DECLINED = 'Declined'
     STATUS_OPTIONS = [STATUS_REQUESTED, STATUS_ACCEPTED, STATUS_DECLINED]
     
-    def __init__(self, ride_id, request_status=STATUS_REQUESTED):
+    def __init__(self, ride_id, request_status=STATUS_REQUESTED, requestor_id=None):
         self.ride_id = ride_id
         self.request_status = request_status
         self.requestor_id = current_user()
@@ -127,7 +127,6 @@ class RideRequest:
             cursor_factory=psycopg2.extras.DictCursor)
     
         RideRequest.abort_if_ride_offer_doesnt_exist(self.ride_id)
-        RideRequest.abort_if_requestor_doesnt_exist(self.requestor_id)
         # RideRequest.abort_if_ride_owner(self.ride_id)
         RideRequest.abort_if_capacity_exceeded(self.ride_id)
         try:
@@ -214,30 +213,6 @@ class RideRequest:
         connection.close()
         if results is None:
             abort(404, message='The ride request with id {} does not exist'.format(request_id))
-        return results
-
-    @staticmethod
-    def abort_if_requestor_doesnt_exist(requestor_id):
-        """
-        A method to check if a ride requestor exists.
-        :param requestor_id: An int, the unique identifier of a ride requestor.
-        :return: Http Response
-        """
-        connection = connectDB()
-        cursor = connection.cursor(
-            cursor_factory=psycopg2.extras.DictCursor)
-        try:
-            cursor.execute('SELECT * FROM app_user WHERE id = %s ;',
-                                ([requestor_id]))
-        except (Exception, psycopg2.DatabaseError) as error:
-            connection.rollback()
-            return {'status': 'failed', 'data': error}, 500
-        results = cursor.fetchone()
-        cursor.close()
-        connection.close()
-
-        if results is None:
-            abort(404, message='The user with id {} does not exist'.format(requestor_id))
         return results
 
     @staticmethod
@@ -328,8 +303,8 @@ class RideRequest:
         results = cursor.fetchone()
         cursor.close()
         connection.close()
-        if results['seats_available'] >= results['capacity']:
-            abort(404, message='Ride capacity has been exceeded')
+        if results['seats_available'] > results['capacity']:
+            abort(404, message='Maximum ride capacity has been exceeded')
         return True
 
     @staticmethod
