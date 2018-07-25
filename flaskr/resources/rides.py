@@ -30,9 +30,6 @@ class RideListResource(Resource):
         self.reqparse.add_argument(
             'date', type=str, required=True, help='Please enter the date', location=['form', 'json']
         )
-        self.reqparse.add_argument(
-            'driver_id', type=int, required=True, help='Please enter the driver', location=['form', 'json']
-        )
         super(RideListResource, self).__init__()
 
     # GET method for ride list
@@ -87,11 +84,6 @@ class RideListResource(Resource):
             required: true
             description: Destination of the ride.
             type: string
-          - name: driver_id
-            in: formData
-            required: true
-            description: Unique identifier of the driver.
-            type: integer
           - name: price
             in: formData
             required: true
@@ -112,7 +104,6 @@ class RideListResource(Resource):
             args['time'],
             args['pickup'],
             args['dropoff'],
-            args['driver_id'],
             args['price']
         )
         return ride.add()
@@ -135,9 +126,6 @@ class RideResource(Resource):
         )
         self.reqparse.add_argument(
             'date', type=str, required=True, help='Please enter the date', location=['form', 'json']
-        )
-        self.reqparse.add_argument(
-            'driver_id', type=int, required=True, help='Please enter the driver', location=['form', 'json']
         )
         self.reqparse.add_argument(
             'status', type=str, required=False, help='Please enter the ride status', default=Ride.STATUS_STARTED, location=['form', 'json']
@@ -183,11 +171,6 @@ class RideResource(Resource):
             required: true
             description: Destination of the ride.
             type: string
-          - name: driver_id
-            in: formData
-            required: true
-            description: Unique identifier of the driver.
-            type: integer
           - name: price
             in: formData
             required: true
@@ -215,7 +198,6 @@ class RideResource(Resource):
                     args['time'], 
                     args['pickup'], 
                     args['dropoff'], 
-                    args['driver_id'], 
                     args['price'], 
                     args['status'], 
                     ride_id

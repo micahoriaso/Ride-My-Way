@@ -61,7 +61,8 @@ def create_db_tables():
         CREATE TABLE car (
             id VARCHAR(140) PRIMARY KEY NOT NULL, 
             model VARCHAR(140) NOT NULL, 
-            capacity INT NOT NULL);
+            capacity INT NOT NULL,
+            owner INT NOT NULL);
         """
     ]
     run_query_commands(queries)

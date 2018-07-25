@@ -2,9 +2,10 @@ from flask import Blueprint
 
 from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from flaskr.models.car import Car
+
 
 from flaskr.resources.helpers import check_for_empty_fields
 
@@ -12,6 +13,7 @@ from flaskr.resources.helpers import check_for_empty_fields
 
 class CarListResource(Resource):
     def __init__(self):
+
         self.reqparse = reqparse.RequestParser(bundle_errors=True)
         self.reqparse.add_argument(
             'registration', type=str, required=True, help='Please enter car registration', location=['form','json']

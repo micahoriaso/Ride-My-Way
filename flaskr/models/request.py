@@ -5,6 +5,8 @@ from flask_restful import abort
 
 from flaskr.db import connectDB
 from flaskr.models.user import User
+from flaskr.resources.helpers import current_user
+
 
 
 class RideRequest:
@@ -18,10 +20,10 @@ class RideRequest:
     STATUS_DECLINED = 'Declined'
     STATUS_OPTIONS = [STATUS_REQUESTED, STATUS_ACCEPTED, STATUS_DECLINED]
     
-    def __init__(self, ride_id, requestor_id, request_status=STATUS_REQUESTED):
+    def __init__(self, ride_id, request_status=STATUS_REQUESTED):
         self.ride_id = ride_id
-        self.requestor_id = requestor_id
         self.request_status = request_status
+        self.requestor_id = current_user()
 
     @staticmethod
     def browse(ride_id):
@@ -33,8 +35,8 @@ class RideRequest:
             cursor_factory=psycopg2.extras.DictCursor)
         RideRequest.abort_if_ride_offer_doesnt_exist(ride_id)
         try:
-            cursor.execute('SELECT id, ride_id, requestor_id, request_status FROM ride_request WHERE ride_id = %s ;',
-                                ([ride_id]))
+            cursor.execute('SELECT id, ride_id, requestor_id, request_status FROM ride_request WHERE ride_id = %s;',
+                           ([ride_id]))
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
             return {'status': 'failed', 'data': error}, 500
@@ -110,6 +112,8 @@ class RideRequest:
                 return {'status': 'failed', 'data': error}, 500
             cursor.close()
             connection.close()
+            if request_status == RideRequest.STATUS_DECLINED:
+                RideRequest.increment_available_seats(ride_id)
             return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
         return {'status': 'failed', 'message': 'You entered an invalid request status'}, 404
 
@@ -121,8 +125,11 @@ class RideRequest:
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
+    
         RideRequest.abort_if_ride_offer_doesnt_exist(self.ride_id)
         RideRequest.abort_if_requestor_doesnt_exist(self.requestor_id)
+        RideRequest.abort_if_ride_owner(self.ride_id)
+        RideRequest.abort_if_capacity_exceeded(self.ride_id)
         try:
             cursor.execute(
                 """INSERT INTO ride_request (ride_id, requestor_id, request_status) 
@@ -134,6 +141,7 @@ class RideRequest:
             return {'status': 'failed', 'data': error}, 500
         cursor.close()
         connection.close()
+        RideRequest.decrement_available_seats(self.ride_id)
         return {'status': 'success', 'message': 'Ride requested successfully'}, 201
 
     @staticmethod
@@ -149,15 +157,17 @@ class RideRequest:
             cursor_factory=psycopg2.extras.DictCursor)
         RideRequest.abort_if_ride_offer_doesnt_exist(ride_id)
         RideRequest.abort_if_ride_request_doesnt_exist(request_id)
+        RideRequest.is_request_owner(request_id)
         try:
-            cursor.execute('DELETE FROM ride_request WHERE id = %s ;',
-                                ([request_id]))
+            cursor.execute('DELETE FROM ride_request WHERE id = %s AND requestor_id = %s ;',
+                                ([request_id, current_user()]))
             connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
             return {'status': 'failed', 'data': error}, 500
         cursor.close()
         connection.close()
+        RideRequest.increment_available_seats(ride_id)
         return {'status': 'success', 'message': 'Ride request successfully deleted'}, 200
 
     @staticmethod
@@ -171,8 +181,8 @@ class RideRequest:
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
         try:
-            cursor.execute('SELECT * FROM ride WHERE id = %s ;',
-                                ([ride_id]))
+            cursor.execute('SELECT * FROM ride WHERE id = %s;',
+                           ([ride_id]))
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
             return {'status': 'failed', 'data': error}, 500
@@ -229,3 +239,142 @@ class RideRequest:
         if results is None:
             abort(404, message='The user with id {} does not exist'.format(requestor_id))
         return results
+
+    @staticmethod
+    def is_request_owner(request_id):
+        """
+        A method to check if a ride  exists.
+        :param ride_id: An int, the unique identifier of the ride.
+        :return: Http Response
+        """
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM ride_request WHERE id = %s AND requestor_id = %s;',
+                           ([int(request_id), current_user()]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results is None:
+            abort(404, message='You do not have permission for this request')
+        return True
+
+    @staticmethod
+    def abort_if_ride_owner(ride_id):
+        """
+        A method to check if the requestor is also the ride  owner.
+        :param ride_id: An int, the unique identifier of the ride.
+        :return: Http Response
+        """
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM ride WHERE id = %s and driver_id = %s;',
+                           ([ride_id, current_user()]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results is None:
+            return True
+        abort(404, message='You cannot request your own ride')
+
+    @staticmethod
+    def abort_if_capacity_exceeded(ride_id):
+        """
+        A method to check if the requestor is also the ride  owner.
+        :param ride_id: An int, the unique identifier of the ride.
+        :return: Http Response
+        """
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM ride WHERE id = %s;',
+                           ([ride_id]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results['seats_available'] < 1:
+            abort(404, message='All seats for this ride have been taken')
+        return True
+
+    @staticmethod
+    def abort_if_max_capacity_exceeded(ride_id):
+        """
+        A method to check if the requestor is also the ride  owner.
+        :param ride_id: An int, the unique identifier of the ride.
+        :return: Http Response
+        """
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM ride WHERE id = %s;',
+                           ([ride_id]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results['seats_available'] >= results['capacity']:
+            abort(404, message='Ride capacity has been exceeded')
+        return True
+
+    @staticmethod
+    def increment_available_seats(ride_id):
+        """
+        A method to check if the requestor is also the ride  owner.
+        :param seats_available: An int, the number of seats available in a ride.
+        :return: Http Response
+        """
+        from flaskr.models.ride import Ride
+        seats_available = Ride.read(ride_id)['seats_available']
+        seats_available += 1
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        RideRequest.abort_if_max_capacity_exceeded(ride_id)
+        try:
+            cursor.execute('UPDATE ride SET seats_available = %s WHERE id = %s;',
+                           ([seats_available, ride_id]))
+            connection.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return error
+        cursor.close()
+        connection.close()
+
+    @staticmethod
+    def decrement_available_seats(ride_id):
+        """
+        A method to check if the requestor is also the ride  owner.
+        :param seats_available: An int, the number of seats available in a ride.
+        :return: Http Response
+        """
+        from flaskr.models.ride import Ride
+        seats_available = Ride.read(ride_id)['seats_available']
+        seats_available -= 1
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('UPDATE ride SET seats_available = %s WHERE id = %s;',
+                           ([seats_available, ride_id]))
+            connection.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return error
+        cursor.close()
+        connection.close()

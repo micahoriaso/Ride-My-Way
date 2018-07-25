@@ -9,7 +9,6 @@ from flask_restful import abort
 
 from flaskr.db import connectDB
 
-from flaskr.models.car import Car
 
 class User:
     """A representation of a user.
@@ -266,14 +265,38 @@ class User:
                     registration))
             return results
 
+    # @staticmethod
+    # def get_car(user_id):
+    #     """
+    #     A method to get a user's car details.
+    #     :param user_id: An int, the unique identifier of the user.
+    #     :return: Http Response
+    #     """
+    #     user = User.read(user_id)
+    #     if user['car_registration'] is None:
+    #         abort(404, message='You have no car yet, enter your car details first to proceed')
+
+    #     from flaskr.models.car import Car
+    #     return Car.read(user_id)
+
+
     @staticmethod
-    def get_car(user_id):
+    def get_by_email(email):
+        """A method to get all details of a user.
+        :param email: A string, a unique email address for the user.
+        :return: user id
         """
-        A method to get a user's car details.
-        :param user_id: An int, the unique identifier of the user.
-        :return: Http Response
-        """
-        user = User.read(user_id)
-        if user['car_registration'] is None:
-            abort(404, message='You have no car yet, enter your car details first to proceed')
-        return Car.read(user['car_registration'])
+        connection = connectDB()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM app_user WHERE email = %s ;',
+                           ([email]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results is None:
+            abort(404, message='The user with email {} does not exist'.format(email))
+        return results['id']

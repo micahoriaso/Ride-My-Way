@@ -18,9 +18,6 @@ class RequestListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'requestor_id', type=int, required=True, help='Please enter requestor', location=['form', 'json']
-        )
-        self.reqparse.add_argument(
             'request_status', type=str, location=['form', 'json'], default=RideRequest.STATUS_REQUESTED
         )
         self.reqparse.add_argument(
@@ -68,11 +65,6 @@ class RequestListResource(Resource):
             required: true
             type: integer
             description: Unique identifier of the ride offer.
-          - name: requestor_id
-            in: formData
-            required: true
-            type: integer
-            description: Unique identifier of the requestor.
         responses:
           500:
             description: Internal server error
@@ -82,7 +74,7 @@ class RequestListResource(Resource):
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
         ride_request = RideRequest(
-            ride_id, args['requestor_id'], args['request_status'])
+            ride_id, args['request_status'])
         return ride_request.add()
 
 class RequestResource(Resource):
