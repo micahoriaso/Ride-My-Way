@@ -128,7 +128,7 @@ class RideRequest:
     
         RideRequest.abort_if_ride_offer_doesnt_exist(self.ride_id)
         RideRequest.abort_if_requestor_doesnt_exist(self.requestor_id)
-        RideRequest.abort_if_ride_owner(self.ride_id)
+        # RideRequest.abort_if_ride_owner(self.ride_id)
         RideRequest.abort_if_capacity_exceeded(self.ride_id)
         try:
             cursor.execute(

@@ -227,7 +227,7 @@ class Ride:
             cursor_factory=psycopg2.extras.DictCursor)
         try:
             cursor.execute('DELETE FROM ride WHERE id = %s AND driver_id = %s;',
-                                ([ride_id, current_user]))
+                                ([ride_id, current_user()]))
             connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
