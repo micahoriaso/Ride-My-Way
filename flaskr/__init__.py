@@ -5,6 +5,7 @@ from flask import Flask
 from flask_restful import Api
 
 from flasgger import Swagger
+from flask_cors import CORS
 
 from flask_jwt_extended import JWTManager
 
@@ -40,6 +41,7 @@ def create_app():
 
     Swagger(app)
     JWTManager(app)
+    CORS(app)
 
     """
     Flask blueprints
@@ -60,6 +62,5 @@ def create_app():
 
     if __name__ == '__main__':
         app.run(debug=True)
-        
-    return app
 
+    return app

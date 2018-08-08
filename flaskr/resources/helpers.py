@@ -3,6 +3,7 @@ import re, datetime
 import psycopg2
 import psycopg2.extras
 
+
 from flask_restful import abort
 
 from flaskr.db import connectDB
@@ -52,3 +53,9 @@ def get_db_rows(query):
     cursor.close()
     connection.close()
     return rows
+
+def current_user():
+    from flask_jwt_extended import get_jwt_identity
+    from flaskr.models.user import User
+    
+    return User.get_by_email(get_jwt_identity())

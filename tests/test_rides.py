@@ -10,14 +10,9 @@ def test_case_data(client, auth_header, header):
         '1': {
             'date': '2018-06-12',
             'time': '11:00',
-            'pickup': 'Nyayo Stadium',
+            'pickup': 'Nyayo Estate',
             'dropoff': 'Belle Vue',
             'price': '100',
-            'capacity': '3',
-            'available_seats': '1',
-            'driver_id': 1,
-            'car': 'Mazda MX5',
-            'registration': 'KAA 987I'
         },
         '4':{
             'date': '2018-06-12',
@@ -25,11 +20,6 @@ def test_case_data(client, auth_header, header):
             'pickup': 'Nyayo Stadium',
             'dropoff': 'Belle Vue',
             'price': '100',
-            'capacity': '3',
-            'available_seats': '1',
-            'driver_id': 1,
-            'car': 'Mazda MX5',
-            'registration': 'KAA 987I'
             },
         '5': {
             "firstname": "Sharon",
@@ -77,10 +67,6 @@ def test_case_data(client, auth_header, header):
         headers=auth_header
     )
 
-    client.put(
-        '/api/v2/users/1',
-        data=json.dumps(data['7']),
-        headers=auth_header)
     return data
 
 
@@ -141,8 +127,8 @@ def test_delete_existing_ride(client, auth_header):
 
 def test_delete_nonexistent_ride(client, auth_header):
     pre_delete_rows = get_db_rows('select * from ride;')
-    post_delete_rows = get_db_rows('select * from ride;')
     response = client.delete('/api/v2/rides/555', headers=auth_header)
+    post_delete_rows = get_db_rows('select * from ride;')
 
     assert len(post_delete_rows) == len(pre_delete_rows)
     assert response.status_code == 404

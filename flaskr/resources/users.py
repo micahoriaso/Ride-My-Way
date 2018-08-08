@@ -36,7 +36,7 @@ class UserListResource(Resource):
         self.reqparse.add_argument(
             'confirm_password', type=str, required=True, help='Please enter the confirm password', location=['form', 'json']
         )
-        
+
 
         super(UserListResource, self).__init__()
 
@@ -83,7 +83,7 @@ class UserListResource(Resource):
           202:
             description: Password is too short. At least 8 characters required
         """
-  
+
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
         if match_email(args['email']):
@@ -107,7 +107,7 @@ class LoginResource(Resource):
         self.reqparse.add_argument(
             'password', type=str, required=True, help='Please enter password', location=['form','json']
         )
-        
+
 
         super(LoginResource, self).__init__()
 
@@ -119,7 +119,7 @@ class LoginResource(Resource):
         tags:
           - User
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: email
             in: formData
@@ -165,11 +165,11 @@ class UserResource(Resource):
         self.reqparse.add_argument(
             'phone_number', location=['form','json']
         )
-        self.reqparse.add_argument(
-            'password', type=str, required=True, help='Please enter password', location=['form','json']
-        )
+        # self.reqparse.add_argument(
+        #     'password', type=str, required=True, help='Please enter password', location=['form','json']
+        # )
 
-        
+
         super(UserResource, self).__init__()
 
     # DELETE method for deleting a user
@@ -181,7 +181,7 @@ class UserResource(Resource):
         tags:
           - User
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: user_id
             in: path
@@ -199,14 +199,14 @@ class UserResource(Resource):
 
     # GET method for a user
     @jwt_required
-    def get(self, user_id):
+    def get(self):
         """
         Endpoint for viewing a user's details
         ---
         tags:
           - User
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: user_id
             in: path
@@ -220,11 +220,11 @@ class UserResource(Resource):
           404:
             description: The user does not exist
         """
-        return User.read(user_id)
+        return User.read()
 
     # PUT method for updating user
     @jwt_required
-    def put(self, user_id):
+    def put(self):
         """
         Endpoint for user profile update
         ---
@@ -271,15 +271,14 @@ class UserResource(Resource):
         """
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
-        if len(args['password']) >= 8:
-            return User.edit(
-                user_id,
-                args['firstname'],
-                args['lastname'],
-                args['password'], args['phone_number'],
-                args['car_registration']
-            )
-        return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
+        # if len(args['password']) >= 8:
+        return User.edit(
+            args['firstname'],
+            args['lastname'],
+            args['phone_number'],
+            args['car_registration']
+        )
+        # return {'status': 'failed', 'message': 'Password is too short. At least 8 characters required'}, 202
 
 
 
@@ -296,5 +295,5 @@ api.add_resource(
 )
 api.add_resource(
     UserResource,
-    '/api/v2/users/<user_id>'
+    '/api/v2/users'
 )

@@ -1,9 +1,12 @@
 import psycopg2
 import psycopg2.extras
+from flask_jwt_extended import get_jwt_identity
 
 from flask_restful import abort
 
 from flaskr.db import connectDB
+from flaskr.models.user import User
+from flaskr.resources.helpers import current_user
 
 
 class Car:
@@ -17,6 +20,8 @@ class Car:
         self.registration = registration
         self.model = model
         self.capacity = capacity
+        self.owner = current_user()
+
 
     @staticmethod
     def browse():
@@ -28,7 +33,8 @@ class Car:
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
         try:
-            cursor.execute('SELECT * FROM car;')
+            cursor.execute('SELECT * FROM car where owner = \'%s\';',
+                           ([current_user()]))
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
             return {'status': 'failed', 'data': error}, 500
@@ -43,7 +49,8 @@ class Car:
                 item = {
                 'registration':car['id'],
                 'model':car['model'],
-                'capacity':car['capacity']
+                'capacity':car['capacity'],
+                'owner': User.read()['fullname']
                 }
                 data.append(item)
             return {'status': 'success', 'message': 'Fetch successful', 'data': data}, 200
@@ -59,8 +66,8 @@ class Car:
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
         try:
-            cursor.execute('SELECT * FROM car WHERE id = %s ;',
-                                ([car_registration]))
+            cursor.execute('SELECT * FROM car WHERE id = %s AND owner = %s;',
+                           ([car_registration, current_user()]))
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
             return {'status': 'failed', 'data': error}, 500
@@ -74,6 +81,7 @@ class Car:
             'registration': results['id'],
             'model': results['model'],
             'capacity': results['capacity'],
+            'owner': User.read()['fullname']
         }
         return car
 
@@ -94,15 +102,16 @@ class Car:
             try:
                 cursor.execute(
                     """
-                    UPDATE car SET 
+                    UPDATE car SET
                         model = %s,
                         capacity = %s
-                    WHERE id = %s;
+                    WHERE id = %s AND owner = %s;
                     """,
                     (
                         model,
                         capacity,
-                        car_registration
+                        car_registration,
+                        current_user()
                     )
                 )
                 connection.commit()
@@ -120,15 +129,16 @@ class Car:
         :return: Http Response
         """
         Car.abort_if_car_registration_is_already_used(self.registration)
+        Car.abort_if_user_has_car(self.owner)
         if Car.capacity_greater_than_zero(self.capacity):
             connection = connectDB()
             cursor = connection.cursor(
                 cursor_factory=psycopg2.extras.DictCursor)
             try:
                 cursor.execute(
-                    """INSERT INTO car (id, model, capacity) 
-                    VALUES (%s, %s, %s);""",
-                    (self.registration, self.model, self.capacity))
+                    """INSERT INTO car (id, model, capacity, owner)
+                    VALUES (%s, %s, %s, %s);""",
+                    (self.registration, self.model, self.capacity, self.owner))
                 connection.commit()
             except (Exception, psycopg2.DatabaseError) as error:
                 connection.rollback()
@@ -150,8 +160,8 @@ class Car:
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
         try:
-            cursor.execute('DELETE FROM car WHERE id = %s ;',
-                                ([car_registration]))
+            cursor.execute('DELETE FROM car WHERE id = %s AND owner = %s ;',
+                           ([car_registration, current_user()]))
             connection.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
@@ -159,7 +169,7 @@ class Car:
         cursor.close()
         connection.close()
         return {'status': 'success', 'data': 'Car successfully deleted'}, 200
-    
+
     @staticmethod
     def abort_if_car_registration_is_already_used(registration):
         """
@@ -194,6 +204,29 @@ class Car:
         return Car.read(registration)
 
     @staticmethod
+    def abort_if_user_has_car(user_id):
+        """
+        A method to check if the user has a car in the database.
+        :param user_id: An integer, a unique identification of the user.
+        :return: Http Response
+        """
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM car WHERE owner = %s ;',
+                           ([user_id]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results is not None:
+            abort(400, message='You already have a car, you do not need to add another one')
+        return results
+
+    @staticmethod
     def capacity_greater_than_zero(capacity):
         """
         A method to check if a car's capacity is greater than zero.
@@ -202,4 +235,35 @@ class Car:
         """
         if capacity > 0:
             return True
-        return False        
+        return False
+
+    @staticmethod
+    def get_by_user_id(user_id):
+        """
+        A method to get a car owned by a specific user.
+        :param user_id: An integer, a unique identification of the user.
+        :return: Http Response
+        """
+        connection = connectDB()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM car WHERE owner = %s ;',
+                           ([user_id]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results is None:
+            abort(
+                404, message='You have no car yet, enter your car details first to proceed')
+
+        car = {
+            'registration': results['id'],
+            'model': results['model'],
+            'capacity': results['capacity'],
+            'owner': User.read()['fullname']
+        }
+        return car

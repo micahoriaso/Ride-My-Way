@@ -6,10 +6,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 
 from flask_restful import abort
+from flaskr.resources.helpers import current_user
 
 from flaskr.db import connectDB
 
-from flaskr.models.car import Car
 
 class User:
     """A representation of a user.
@@ -33,7 +33,7 @@ class User:
         self.car_registration = car_registration
 
     @staticmethod
-    def read(user_id):
+    def read(*user_id):
         """A method to get all details of a user.
         :param user_id: An int, a unique identifier of the user.
         :return: user details
@@ -42,7 +42,7 @@ class User:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         try:
             cursor.execute('SELECT * FROM app_user WHERE id = %s ;',
-                           ([user_id]))
+                           ([user_id if user_id else current_user()]))
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback()
             return {'status': 'failed', 'data': error}, 500
@@ -64,7 +64,7 @@ class User:
         return user
 
     @staticmethod
-    def edit(user_id, firstname, lastname, password, phone_number=None, car_registration=None):
+    def edit(firstname, lastname, phone_number=None, car_registration=None):
         """
         A method to accept/decline a ride request.
         :param firstname: A string, the firstname of the user.
@@ -76,8 +76,6 @@ class User:
         """
         connection = connectDB()
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        User.abort_if_user_doesnt_exist(user_id)
-        User.abort_if_car_doesnt_exist(car_registration)
         try:
             cursor.execute(
                 """UPDATE app_user SET
@@ -85,7 +83,6 @@ class User:
                     lastname = %s,
                     fullname = %s,
                     phone_number = %s,
-                    password = %s,
                     car_registration = %s
                 WHERE id = %s;""",
                 (
@@ -95,12 +92,8 @@ class User:
                         firstname, lastname
                     ),
                     phone_number,
-                    generate_password_hash(
-                        password,
-                        method='sha256'
-                    ),
                     car_registration,
-                    int(user_id)
+                    current_user()
                 )
             )
             connection.commit()
@@ -151,7 +144,7 @@ class User:
         cursor.close()
         connection.close()
         return {
-            'status': 'success', 
+            'status': 'success',
             'message': 'Account creation successful',
             'access_token': access_token,
             }, 201
@@ -243,18 +236,37 @@ class User:
         return results
 
     @staticmethod
-    def abort_if_car_doesnt_exist(registration):
+    def get_by_email(email):
+        """A method to get all details of a user.
+        :param email: A string, a unique email address for the user.
+        :return: user id
         """
-        A method to check if a car exists.
-        :param registration: A string, the licence plate of the user's car.
-        :return: Http Response
-        """
-        if registration is not None:
+        connection = connectDB()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cursor.execute('SELECT * FROM app_user WHERE email = %s ;',
+                           ([email]))
+        except (Exception, psycopg2.DatabaseError) as error:
+            connection.rollback()
+            return {'status': 'failed', 'data': error}, 500
+        results = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if results is None:
+            abort(404, message='The user with email {} does not exist'.format(email))
+        return results['id']
+
+        @staticmethod
+        def get(user_id):
+            """A method to get all details of a user.
+            :param user_id: An int, a unique identifier of the user.
+            :return: user details
+            """
             connection = connectDB()
             cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
-                cursor.execute('SELECT * FROM car WHERE id = %s ;',
-                            ([registration]))
+                cursor.execute('SELECT * FROM app_user WHERE id = %s ;',
+                               ([user_id]))
             except (Exception, psycopg2.DatabaseError) as error:
                 connection.rollback()
                 return {'status': 'failed', 'data': error}, 500
@@ -262,18 +274,15 @@ class User:
             cursor.close()
             connection.close()
             if results is None:
-                abort(404, message='The car with licence plate {} cannot be found in our records'.format(
-                    registration))
-            return results
-
-    @staticmethod
-    def get_car(user_id):
-        """
-        A method to get a user's car details.
-        :param user_id: An int, the unique identifier of the user.
-        :return: Http Response
-        """
-        user = User.read(user_id)
-        if user['car_registration'] is None:
-            abort(404, message='You have no car yet, enter your car details first to proceed')
-        return Car.read(user['car_registration'])
+                abort(404, message='The user with id {} does not exist'.format(user_id))
+            user = {
+                'id': results['id'],
+                'firstname': results['firstname'],
+                'lastname': results['lastname'],
+                'fullname': results['fullname'],
+                'email': results['email'],
+                'phone_number': results['phone_number'],
+                'password': results['password'],
+                'car_registration': results['car_registration']
+            }
+            return user

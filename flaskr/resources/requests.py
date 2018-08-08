@@ -18,9 +18,6 @@ class RequestListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'requestor_id', type=int, required=True, help='Please enter requestor', location=['form', 'json']
-        )
-        self.reqparse.add_argument(
             'request_status', type=str, location=['form', 'json'], default=RideRequest.STATUS_REQUESTED
         )
         self.reqparse.add_argument(
@@ -37,7 +34,7 @@ class RequestListResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -61,18 +58,13 @@ class RequestListResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
             required: true
             type: integer
             description: Unique identifier of the ride offer.
-          - name: requestor_id
-            in: formData
-            required: true
-            type: integer
-            description: Unique identifier of the requestor.
         responses:
           500:
             description: Internal server error
@@ -82,14 +74,14 @@ class RequestListResource(Resource):
         args = self.reqparse.parse_args()
         check_for_empty_fields(args)
         ride_request = RideRequest(
-            ride_id, args['requestor_id'], args['request_status'])
+            ride_id, args['request_status'])
         return ride_request.add()
 
 class RequestResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'request_status', type=str, location=['form', 'json'], default=RideRequest.STATUS_REQUESTED
+            'request_status', type=str, location=['form', 'json']
         )
         super(RequestResource, self).__init__()
 
@@ -102,7 +94,7 @@ class RequestResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -129,7 +121,7 @@ class RequestResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -147,8 +139,8 @@ class RequestResource(Resource):
         """
         request = RideRequest.read(ride_id, request_id)
         return {'status': 'success', 'message': 'Fetch successful', 'data': request}
-      
-    
+
+
     @jwt_required
     def put(self, ride_id, request_id):
         # PUT method for editing a ride request
@@ -158,7 +150,7 @@ class RequestResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -194,10 +186,10 @@ class RequestResource(Resource):
 requests_bp = Blueprint('resources.requests', __name__)
 api = Api(requests_bp)
 api.add_resource(
-    RequestResource, 
+    RequestResource,
     '/api/v2/rides/<ride_id>/requests/<request_id>'
 )
 api.add_resource(
-    RequestListResource, 
+    RequestListResource,
     '/api/v2/rides/<ride_id>/requests'
     )

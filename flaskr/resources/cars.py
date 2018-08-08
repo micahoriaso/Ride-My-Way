@@ -2,9 +2,10 @@ from flask import Blueprint
 
 from flask_restful import Resource, reqparse, fields, marshal, abort, Api
 
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from flaskr.models.car import Car
+
 
 from flaskr.resources.helpers import check_for_empty_fields
 
@@ -12,6 +13,7 @@ from flaskr.resources.helpers import check_for_empty_fields
 
 class CarListResource(Resource):
     def __init__(self):
+
         self.reqparse = reqparse.RequestParser(bundle_errors=True)
         self.reqparse.add_argument(
             'registration', type=str, required=True, help='Please enter car registration', location=['form','json']
@@ -33,7 +35,7 @@ class CarListResource(Resource):
         tags:
           - Car
         security:
-          - Bearer: []  
+          - Bearer: []
         responses:
           500:
             description: Internal server error
@@ -53,7 +55,7 @@ class CarListResource(Resource):
         tags:
           - Car
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: registration
             in: formData
@@ -106,7 +108,7 @@ class CarResource(Resource):
         tags:
           - Car
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: registration
             in: path
@@ -135,7 +137,7 @@ class CarResource(Resource):
         check_for_empty_fields(args)
         return Car.edit(registration, args['model'], args['capacity'])
 
-        
+
     # GET method for a car
     @jwt_required
     def get(self, registration):
@@ -145,7 +147,7 @@ class CarResource(Resource):
         tags:
           - Car
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: registration
             in: path
@@ -172,7 +174,7 @@ class CarResource(Resource):
         tags:
           - Car
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: registration
             in: path
