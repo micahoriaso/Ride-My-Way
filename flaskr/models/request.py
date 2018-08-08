@@ -19,7 +19,7 @@ class RideRequest:
     STATUS_ACCEPTED = 'Accepted'
     STATUS_DECLINED = 'Declined'
     STATUS_OPTIONS = [STATUS_REQUESTED, STATUS_ACCEPTED, STATUS_DECLINED]
-    
+
     def __init__(self, ride_id, request_status=STATUS_REQUESTED, requestor_id=None):
         self.ride_id = ride_id
         self.request_status = request_status
@@ -114,7 +114,7 @@ class RideRequest:
             connection.close()
             if request_status == RideRequest.STATUS_DECLINED:
                 RideRequest.increment_available_seats(ride_id)
-            return {'status': 'success', 'data': 'Ride request successfully updated'}, 200
+            return {'status': 'success', 'data': 'Ride request {}'.format(request_status)}, 200
         return {'status': 'failed', 'message': 'You entered an invalid request status'}, 404
 
     def add(self):
@@ -125,13 +125,13 @@ class RideRequest:
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
-    
+
         RideRequest.abort_if_ride_offer_doesnt_exist(self.ride_id)
         # RideRequest.abort_if_ride_owner(self.ride_id)
         RideRequest.abort_if_capacity_exceeded(self.ride_id)
         try:
             cursor.execute(
-                """INSERT INTO ride_request (ride_id, requestor_id, request_status) 
+                """INSERT INTO ride_request (ride_id, requestor_id, request_status)
                 VALUES (%s, %s, %s);""",
                 (self.ride_id, self.requestor_id, self.request_status))
             connection.commit()

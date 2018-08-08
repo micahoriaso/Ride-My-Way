@@ -53,16 +53,16 @@ def test_case_data(client, auth_header, header):
 
     client.post('/api/v2/auth/signup',
         data=json.dumps(data['5']), headers=header)
-    
+
     client.post(
         '/api/v2/cars/',
-        data=json.dumps(data['6']), 
+        data=json.dumps(data['6']),
         headers=auth_header
         )
 
     client.post(
         '/api/v2/rides/',
-        data=json.dumps(data['4']), 
+        data=json.dumps(data['4']),
         headers=auth_header
         )
 
@@ -89,14 +89,14 @@ def test_add_new_ride_offer_request(client, test_case_data, auth_header):
 
 def test_get_all_requests(client, auth_header):
     response = client.get(
-        '/api/v2/rides/1/requests', 
+        '/api/v2/rides/1/requests',
         headers=auth_header
         )
     assert response.status_code == 200
 
 def test_get_all_requests_for_nonexisting_ride(client, auth_header):
     response = client.get(
-        '/api/v2/rides/77887/requests', 
+        '/api/v2/rides/77887/requests',
         headers=auth_header
         )
     response_data = response.get_json()
@@ -106,7 +106,7 @@ def test_get_all_requests_for_nonexisting_ride(client, auth_header):
 
 def test_get_nonexisting_ride_request(client, auth_header):
     response = client.get(
-        '/api/v2/rides/1/requests/77887', 
+        '/api/v2/rides/1/requests/77887',
         headers=auth_header
         )
     response_data = response.get_json()
@@ -117,7 +117,7 @@ def test_get_nonexisting_ride_request(client, auth_header):
 
 def test_get_ride_request_details(client, auth_header, test_case_data):
     response = client.get(
-        '/api/v2/rides/1/requests/1', 
+        '/api/v2/rides/1/requests/1',
         headers=auth_header
         )
     response_data = response.get_json()
@@ -128,18 +128,18 @@ def test_get_ride_request_details(client, auth_header, test_case_data):
 
 def test_edit_existing_ride_offer_request(client, test_case_data, auth_header):
     response = client.put(
-        '/api/v2/rides/1/requests/1', 
-        data=json.dumps(test_case_data['3']), 
+        '/api/v2/rides/1/requests/1',
+        data=json.dumps(test_case_data['3']),
         headers=auth_header
         )
     response_data = response.get_json()
     assert response.status_code == 200
-    assert response_data['data'] == 'Ride request successfully updated'
+    assert response_data['data'] == 'Ride request Declined'
 
 def test_edit_ride_offer_request_with_invalid_status(client, test_case_data, auth_header):
     response = client.put(
-        '/api/v2/rides/1/requests/1', 
-        data=json.dumps(test_case_data['8']), 
+        '/api/v2/rides/1/requests/1',
+        data=json.dumps(test_case_data['8']),
         headers=auth_header
         )
     response_data = response.get_json()
@@ -149,7 +149,7 @@ def test_edit_ride_offer_request_with_invalid_status(client, test_case_data, aut
 def test_delete_existing_ride_offer_request(client, test_case_data, auth_header):
     pre_delete_rows = get_db_rows('select * from ride_request;')
     response = client.delete(
-        '/api/v2/rides/1/requests/1', 
+        '/api/v2/rides/1/requests/1',
         headers=auth_header
         )
     post_delete_rows = get_db_rows('select * from ride_request;')
@@ -160,7 +160,7 @@ def test_delete_existing_ride_offer_request(client, test_case_data, auth_header)
 def test_delete_nonexistent_ride_offer_request(client, auth_header):
     pre_delete_rows = get_db_rows('select * from ride_request;')
     response = client.delete(
-        '/api/v2/rides/1/requests/20', 
+        '/api/v2/rides/1/requests/20',
         headers=auth_header
         )
     post_delete_rows = get_db_rows('select * from ride_request;')
@@ -172,7 +172,7 @@ def test_delete_nonexistent_ride_offer_request(client, auth_header):
 def test_delete_request_from_nonexistent_ride_offer(client, auth_header):
     pre_delete_rows = get_db_rows('select * from ride_request;')
     response = client.delete(
-        '/api/v2/rides/200/requests/1', 
+        '/api/v2/rides/200/requests/1',
         headers=auth_header
         )
     post_delete_rows = get_db_rows('select * from ride_request;')

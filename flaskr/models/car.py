@@ -50,7 +50,7 @@ class Car:
                 'registration':car['id'],
                 'model':car['model'],
                 'capacity':car['capacity'],
-                'owner': User.read(car['owner'])['fullname']
+                'owner': User.read()['fullname']
                 }
                 data.append(item)
             return {'status': 'success', 'message': 'Fetch successful', 'data': data}, 200
@@ -81,7 +81,7 @@ class Car:
             'registration': results['id'],
             'model': results['model'],
             'capacity': results['capacity'],
-            'owner': User.read(results['owner'])['fullname']
+            'owner': User.read()['fullname']
         }
         return car
 
@@ -102,7 +102,7 @@ class Car:
             try:
                 cursor.execute(
                     """
-                    UPDATE car SET 
+                    UPDATE car SET
                         model = %s,
                         capacity = %s
                     WHERE id = %s AND owner = %s;
@@ -136,7 +136,7 @@ class Car:
                 cursor_factory=psycopg2.extras.DictCursor)
             try:
                 cursor.execute(
-                    """INSERT INTO car (id, model, capacity, owner) 
+                    """INSERT INTO car (id, model, capacity, owner)
                     VALUES (%s, %s, %s, %s);""",
                     (self.registration, self.model, self.capacity, self.owner))
                 connection.commit()
@@ -169,7 +169,7 @@ class Car:
         cursor.close()
         connection.close()
         return {'status': 'success', 'data': 'Car successfully deleted'}, 200
-    
+
     @staticmethod
     def abort_if_car_registration_is_already_used(registration):
         """
@@ -264,6 +264,6 @@ class Car:
             'registration': results['id'],
             'model': results['model'],
             'capacity': results['capacity'],
-            'owner': User.read(results['owner'])['fullname']
+            'owner': User.read()['fullname']
         }
         return car

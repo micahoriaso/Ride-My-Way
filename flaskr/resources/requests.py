@@ -34,7 +34,7 @@ class RequestListResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -58,7 +58,7 @@ class RequestListResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -81,7 +81,7 @@ class RequestResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'request_status', type=str, location=['form', 'json'], default=RideRequest.STATUS_REQUESTED
+            'request_status', type=str, location=['form', 'json']
         )
         super(RequestResource, self).__init__()
 
@@ -94,7 +94,7 @@ class RequestResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -121,7 +121,7 @@ class RequestResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -139,8 +139,8 @@ class RequestResource(Resource):
         """
         request = RideRequest.read(ride_id, request_id)
         return {'status': 'success', 'message': 'Fetch successful', 'data': request}
-      
-    
+
+
     @jwt_required
     def put(self, ride_id, request_id):
         # PUT method for editing a ride request
@@ -150,7 +150,7 @@ class RequestResource(Resource):
         tags:
           - Ride request
         security:
-          - Bearer: []  
+          - Bearer: []
         parameters:
           - name: ride_id
             in: path
@@ -186,10 +186,10 @@ class RequestResource(Resource):
 requests_bp = Blueprint('resources.requests', __name__)
 api = Api(requests_bp)
 api.add_resource(
-    RequestResource, 
+    RequestResource,
     '/api/v2/rides/<ride_id>/requests/<request_id>'
 )
 api.add_resource(
-    RequestListResource, 
+    RequestListResource,
     '/api/v2/rides/<ride_id>/requests'
     )

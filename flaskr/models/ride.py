@@ -45,6 +45,7 @@ class Ride:
         """A method to get all rides.
         :return: A list of dictionaries with all rides
         """
+        from flaskr.models.car import Car
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
@@ -71,6 +72,8 @@ class Ride:
                     'seats_available': ride['seats_available'],
                     'driver': User.read(ride['driver_id'])['fullname'],
                     'price': ride['price'],
+                    'car': Car.get_by_user_id(ride['driver_id'])['model'],
+                    'owner': Ride.is_ride_owner(ride['id']),
                     'status': ride['status']
                 }
                 data.append(item)
@@ -83,6 +86,8 @@ class Ride:
         :param ride_id: An int, the unique identifier of the ride.
         :return: ride details
         """
+        from flaskr.models.car import Car
+
         connection = connectDB()
         cursor = connection.cursor(
             cursor_factory=psycopg2.extras.DictCursor)
@@ -110,7 +115,11 @@ class Ride:
             'driver': User.read(results['driver_id'])['fullname'],
             'price': results['price'],
             'status': results['status'],
+            'status_options': Ride.STATUS_OPTIONS,
+            'car': Car.get_by_user_id(results['driver_id'])['model'],
+            'owner': Ride.is_ride_owner(results['id']),
             'requests': Ride.get_requests(ride_id)
+
         }
         return ride
 
@@ -139,7 +148,7 @@ class Ride:
             Ride.abort_if_ride_offer_doesnt_exist(ride_id)
             try:
                 cursor.execute(
-                    """UPDATE ride SET 
+                    """UPDATE ride SET
                         date = %s,
                         time = %s,
                         pickup = %s,
@@ -184,14 +193,14 @@ class Ride:
                 """INSERT INTO ride (
                     date,
                     time,
-                    pickup, 
+                    pickup,
                     dropoff,
                     capacity,
                     seats_available,
                     driver_id,
                     price,
                     status
-                    ) 
+                    )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);""",
                 (
                     self.date,
@@ -287,7 +296,8 @@ class Ride:
         cursor.close()
         connection.close()
         if results is None:
-            abort(404, message='You do not have permission for this ride')
+            return False
+            # abort(404, message='You do not have permission for this ride')
         return True
 
     @staticmethod
@@ -299,4 +309,3 @@ class Ride:
         """
         from flaskr.models.request import RideRequest
         return RideRequest.browse(ride_id)
-
